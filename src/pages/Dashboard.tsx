@@ -1,17 +1,20 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import StatCard from '@/components/dashboard/widgets/StatCard';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import DraggableWidget from '@/components/dashboard/widgets/DraggableWidget';
-import { Box, Calendar, Edit, PackagePlus, Plus, Tag } from 'lucide-react';
+import { Box, Calendar, Edit, FileText, Link2, PackagePlus, Plus, Printer, Tag, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // Sample data for the charts
 const monthlyData = [
@@ -22,6 +25,35 @@ const monthlyData = [
   { name: 'May', 'Engin Tagged': 56, 'Engin Enter': 86, 'Engin Exit': 75 },
   { name: 'June', 'Engin Tagged': 55, 'Engin Enter': 27, 'Engin Exit': 15 },
   { name: 'July', 'Engin Tagged': 40, 'Engin Enter': 90, 'Engin Exit': 48 },
+];
+
+// Analytical data
+const analyticalData = [
+  { name: 'Week 1', 'Utilisation': 78, 'Maintenance': 22, 'Idle': 10 },
+  { name: 'Week 2', 'Utilisation': 65, 'Maintenance': 15, 'Idle': 20 },
+  { name: 'Week 3', 'Utilisation': 70, 'Maintenance': 10, 'Idle': 20 },
+  { name: 'Week 4', 'Utilisation': 82, 'Maintenance': 8, 'Idle': 10 },
+];
+
+// AI predictions data
+const aiPredictionsData = [
+  { name: 'Aug', 'Actual': 65, 'Predicted': 68 },
+  { name: 'Sep', 'Actual': 59, 'Predicted': 57 },
+  { name: 'Oct', 'Actual': 80, 'Predicted': 82 },
+  { name: 'Nov', 'Actual': 81, 'Predicted': 78 },
+  { name: 'Dec', 'Actual': 56, 'Predicted': 58 },
+  { name: 'Jan', 'Predicted': 76 },
+  { name: 'Feb', 'Predicted': 84 },
+  { name: 'Mar', 'Predicted': 92 },
+];
+
+// Custom data for the table
+const tableData = [
+  { id: 1, name: "Bulldozer BX-250", status: "Actif", location: "Zone A", lastUsed: "2023-07-20" },
+  { id: 2, name: "Excavatrice EX-450", status: "Maintenance", location: "Atelier", lastUsed: "2023-07-15" },
+  { id: 3, name: "Chargeuse CL-300", status: "Actif", location: "Zone B", lastUsed: "2023-07-21" },
+  { id: 4, name: "Compacteur CP-100", status: "Inactif", location: "Entrepôt", lastUsed: "2023-07-10" },
+  { id: 5, name: "Grue GR-750", status: "Actif", location: "Zone C", lastUsed: "2023-07-19" },
 ];
 
 // Types des widgets disponibles
@@ -42,6 +74,7 @@ const generateId = () => {
 };
 
 const Dashboard = () => {
+  const dashboardRef = useRef<HTMLDivElement>(null);
   const [widgets, setWidgets] = useState<Widget[]>([
     {
       id: generateId(),
@@ -104,6 +137,157 @@ const Dashboard = () => {
       width: 'full'
     }
   ]);
+
+  // Widgets for analytics tab
+  const analyticsWidgets = [
+    {
+      id: generateId(),
+      type: 'chart',
+      title: 'Analyse d\'utilisation hebdomadaire',
+      props: {
+        data: analyticalData,
+        type: 'bar',
+        colors: ['#7056AB', '#F97CE5', '#1E88E5'],
+        height: 300
+      },
+      width: 'full'
+    },
+    {
+      id: generateId(),
+      type: 'stat',
+      title: 'Taux d\'utilisation',
+      props: {
+        icon: <Box size={24} />,
+        value: '75%',
+        progress: 75,
+        color: 'purple'
+      },
+      width: '1/3'
+    },
+    {
+      id: generateId(),
+      type: 'stat',
+      title: 'Efficacité opérationnelle',
+      props: {
+        icon: <Calendar size={24} />,
+        value: '82%',
+        progress: 82,
+        color: 'green'
+      },
+      width: '1/3'
+    },
+    {
+      id: generateId(),
+      type: 'stat',
+      title: 'Durée moyenne des tâches',
+      props: {
+        icon: <FileText size={24} />,
+        value: '4.2h',
+        progress: 70,
+        color: 'blue'
+      },
+      width: '1/3'
+    }
+  ];
+
+  // Widgets for custom tab
+  const customWidgets = [
+    {
+      id: generateId(),
+      type: 'table',
+      title: 'Équipements sur site',
+      props: {
+        data: tableData
+      },
+      width: 'full'
+    },
+    {
+      id: generateId(),
+      type: 'chart',
+      title: 'Répartition par statut',
+      props: {
+        data: [
+          { name: 'Actif', value: 60 },
+          { name: 'Maintenance', value: 20 },
+          { name: 'Inactif', value: 20 }
+        ],
+        type: 'pie',
+        colors: ['#66BB6A', '#FFC107', '#E91E63'],
+        height: 250
+      },
+      width: '1/2'
+    },
+    {
+      id: generateId(),
+      type: 'chart',
+      title: 'Répartition par zone',
+      props: {
+        data: [
+          { name: 'Zone A', value: 40 },
+          { name: 'Zone B', value: 30 },
+          { name: 'Zone C', value: 20 },
+          { name: 'Entrepôt', value: 5 },
+          { name: 'Atelier', value: 5 }
+        ],
+        type: 'pie',
+        colors: ['#1E88E5', '#7056AB', '#66BB6A', '#FFC107', '#E91E63'],
+        height: 250
+      },
+      width: '1/2'
+    }
+  ];
+
+  // Widgets for AI tab
+  const aiWidgets = [
+    {
+      id: generateId(),
+      type: 'chart',
+      title: 'Prédictions d\'utilisation',
+      props: {
+        data: aiPredictionsData,
+        type: 'line',
+        colors: ['#66BB6A', '#7056AB'],
+        height: 300
+      },
+      width: 'full'
+    },
+    {
+      id: generateId(),
+      type: 'stat',
+      title: 'Précision des prédictions',
+      props: {
+        icon: <Box size={24} />,
+        value: '92%',
+        progress: 92,
+        color: 'purple'
+      },
+      width: '1/3'
+    },
+    {
+      id: generateId(),
+      type: 'stat',
+      title: 'Anomalies détectées',
+      props: {
+        icon: <Tag size={24} />,
+        value: '3',
+        progress: 30,
+        color: 'red'
+      },
+      width: '1/3'
+    },
+    {
+      id: generateId(),
+      type: 'stat',
+      title: 'Maintenance prédictive',
+      props: {
+        icon: <Calendar size={24} />,
+        value: '5 jours',
+        progress: 80,
+        color: 'yellow'
+      },
+      width: '1/3'
+    }
+  ];
 
   const [activeTab, setActiveTab] = useState('main');
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);
@@ -185,6 +369,9 @@ const Dashboard = () => {
           height: 300
         };
       case 'table':
+        return {
+          data: tableData
+        };
       case 'custom':
       default:
         return {};
@@ -217,7 +404,38 @@ const Dashboard = () => {
         return (
           <Card className="h-full p-4">
             <h3 className="text-lg font-medium mb-4">{widget.title}</h3>
-            <p className="text-muted-foreground">Table Widget (Non implémenté)</p>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Emplacement</TableHead>
+                    <TableHead>Dernière utilisation</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {widget.props.data.map((row: any) => (
+                    <TableRow key={row.id}>
+                      <TableCell>{row.id}</TableCell>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          row.status === 'Actif' ? 'bg-green-100 text-green-800' :
+                          row.status === 'Maintenance' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {row.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>{row.location}</TableCell>
+                      <TableCell>{row.lastUsed}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </Card>
         );
       case 'custom':
@@ -245,12 +463,75 @@ const Dashboard = () => {
     }
   };
 
+  const getCurrentWidgets = () => {
+    switch (activeTab) {
+      case 'analytics':
+        return analyticsWidgets;
+      case 'custom':
+        return customWidgets;
+      case 'ai':
+        return aiWidgets;
+      case 'main':
+      default:
+        return widgets;
+    }
+  };
+
+  const exportToPDF = () => {
+    if (!dashboardRef.current) return;
+
+    toast.info('Génération du PDF en cours...');
+
+    const dashboardElement = dashboardRef.current;
+    const currentTab = activeTab;
+    const currentDate = new Date().toLocaleDateString();
+    
+    // Création du PDF
+    html2canvas(dashboardElement).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      // Ajout d'un en-tête au PDF
+      pdf.setFillColor(112, 86, 171); // Couleur LogiTag
+      pdf.rect(0, 0, pdfWidth, 20, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(16);
+      pdf.text(`Tableau de bord LogiTag - ${currentTab.toUpperCase()}`, 14, 12);
+      
+      // Ajout d'informations supplémentaires
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(10);
+      pdf.text(`Date: ${currentDate}`, pdfWidth - 50, 30);
+      pdf.text('Généré par: Système LogiTag', pdfWidth - 70, 35);
+      
+      // Ajout de l'image du dashboard
+      pdf.addImage(imgData, 'PNG', 10, 40, pdfWidth - 20, pdfHeight - 20);
+      
+      // Ajout d'un pied de page
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text('© 2023 LogiTag. Tous droits réservés.', pdfWidth / 2, pdfHeight + 30, { align: 'center' });
+      
+      pdf.save(`logitag-dashboard-${currentTab}-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast.success('PDF généré avec succès!');
+    });
+  };
+
   return (
     <DashboardLayout title="Tableau de bord">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         
         <div className="flex items-center space-x-2">
+          <Button variant="outline" onClick={exportToPDF}>
+            <Download size={16} className="mr-2" />
+            Exporter en PDF
+          </Button>
+          
           <Dialog open={isAddWidgetOpen} onOpenChange={setIsAddWidgetOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center">
@@ -348,8 +629,8 @@ const Dashboard = () => {
         </TabsList>
       </Tabs>
       
-      <div className="grid grid-cols-12 gap-6">
-        {widgets.map((widget) => (
+      <div ref={dashboardRef} className="grid grid-cols-12 gap-6">
+        {getCurrentWidgets().map((widget) => (
           <div key={widget.id} className={getWidthClass(widget.width)}>
             <DraggableWidget
               id={widget.id}

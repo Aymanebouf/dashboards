@@ -71,8 +71,7 @@ const StatCard: React.FC<StatCardProps> = ({
         <div className="mt-auto">
           <Progress 
             value={progress} 
-            className="h-2 mb-2"
-            indicatorClassName={colorVariants[color].progressBar}
+            className={cn("h-2 mb-2", colorVariants[color].progressBar)}
           />
           <div className="flex items-center justify-between text-sm">
             <span className="font-semibold text-lg">{value}</span>

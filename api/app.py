@@ -122,5 +122,10 @@ def get_zone_distribution():
     
     return jsonify(data)
 
+# Route pour la page d'accueil qui permet de vérifier que le serveur fonctionne
+@app.route('/', methods=['GET'])
+def home():
+    return "Serveur API Flask en cours d'exécution. Accédez à /api/equipment pour voir les données."
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

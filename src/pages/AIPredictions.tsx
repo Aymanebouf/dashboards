@@ -7,22 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Calendar, Download, FileInput, LineChart, Loader2, RefreshCcw, Upload } from 'lucide-react';
+import { Brain, Calendar, Download, FileInput, LineChart, Loader2, RefreshCcw, SendHorizonal, Upload } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
-
-// Données fictives pour les prédictions
-const predictionData = [
-  { name: 'Aug', 'Actual': 65, 'Predicted': 68 },
-  { name: 'Sep', 'Actual': 59, 'Predicted': 57 },
-  { name: 'Oct', 'Actual': 80, 'Predicted': 82 },
-  { name: 'Nov', 'Actual': 81, 'Predicted': 78 },
-  { name: 'Dec', 'Actual': 56, 'Predicted': 58 },
-  { name: 'Jan', 'Predicted': 76 },
-  { name: 'Feb', 'Predicted': 84 },
-  { name: 'Mar', 'Predicted': 92 },
-];
+import { fetchAIPredictions } from '@/services/api';
+import { Textarea } from '@/components/ui/textarea';
 
 // Données fictives pour les tendances
 const trendsData = [
@@ -49,22 +39,19 @@ const anomaliesData = [
   { name: '10/01', 'Value': 70, 'Threshold': 70 },
 ];
 
-// Simuler un appel API pour les prédictions
-const fetchPredictions = async () => {
-  // Simule un délai d'API
-  await new Promise((resolve) => setTimeout(resolve, 1500));
-  return predictionData;
-};
-
 const AIPredictions = () => {
   const [selectedModel, setSelectedModel] = useState('linear');
   const [timeRange, setTimeRange] = useState('3');
   const [isTraining, setIsTraining] = useState(false);
   const [trainingProgress, setTrainingProgress] = useState(0);
+  const [userPrompt, setUserPrompt] = useState('');
+  const [isProcessingPrompt, setIsProcessingPrompt] = useState(false);
+  const [aiRemarks, setAiRemarks] = useState<string[]>([]);
+  const [customDashboard, setCustomDashboard] = useState<any[]>([]);
 
   const { data: predictions, isLoading, refetch } = useQuery({
     queryKey: ['predictions', selectedModel, timeRange],
-    queryFn: fetchPredictions,
+    queryFn: fetchAIPredictions,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -119,6 +106,59 @@ const AIPredictions = () => {
     }, 2000);
   };
 
+  const handlePromptSubmit = () => {
+    if (!userPrompt.trim()) return;
+
+    setIsProcessingPrompt(true);
+    toast.info('Analyse de votre demande en cours...');
+
+    // Simuler le traitement de la demande
+    setTimeout(() => {
+      setIsProcessingPrompt(false);
+      
+      // Ajouter des remarques d'IA
+      const newRemarks = [
+        ...aiRemarks,
+        `Je comprends que vous cherchez à analyser "${userPrompt.substring(0, 30)}..."`,
+        "J'ai créé un tableau de bord personnalisé basé sur votre demande.",
+        "Les données indiquent une tendance positive pour les prochains mois.",
+        "Recommandation: Surveillez l'utilisation des équipements pour optimiser les ressources."
+      ];
+      
+      setAiRemarks(newRemarks);
+      
+      // Générer un tableau de bord personnalisé
+      setCustomDashboard([
+        {
+          title: "Prévision adaptée",
+          type: "line",
+          data: [
+            { name: 'Janv', 'Valeur': 45, 'Prévision': 50 },
+            { name: 'Févr', 'Valeur': 52, 'Prévision': 55 },
+            { name: 'Mars', 'Valeur': 58, 'Prévision': 60 },
+            { name: 'Avri', 'Valeur': 63, 'Prévision': 67 },
+            { name: 'Mai', 'Valeur': 69, 'Prévision': 75 },
+            { name: 'Juin', 'Valeur': null, 'Prévision': 80 },
+          ],
+          colors: ['#1E88E5', '#66BB6A']
+        },
+        {
+          title: "Répartition d'utilisation",
+          type: "pie",
+          data: [
+            { name: 'Zone A', value: 45 },
+            { name: 'Zone B', value: 30 },
+            { name: 'Zone C', value: 25 }
+          ],
+          colors: ['#1E88E5', '#66BB6A', '#FFC107']
+        }
+      ]);
+      
+      toast.success('Tableau de bord personnalisé généré !');
+      setUserPrompt('');
+    }, 2500);
+  };
+
   return (
     <DashboardLayout title="Prédictions IA">
       <div className="flex justify-between items-center mb-6">
@@ -131,6 +171,83 @@ const AIPredictions = () => {
           <Brain size={16} className="mr-2" />
           Générer des insights
         </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Analyse par l'IA</CardTitle>
+            <CardDescription>
+              Expliquez votre besoin en langage naturel et l'IA créera un tableau de bord personnalisé
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <div className="w-1/3 bg-muted/20 rounded-lg p-4 space-y-3 h-64 overflow-y-auto">
+                <h3 className="text-sm font-medium">Remarques de l'IA</h3>
+                {aiRemarks.length > 0 ? (
+                  <div className="space-y-2">
+                    {aiRemarks.map((remark, index) => (
+                      <div key={index} className="p-2 bg-background border rounded-md text-xs">
+                        {remark}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                    Les remarques de l'IA apparaîtront ici après votre demande
+                  </div>
+                )}
+              </div>
+              
+              <div className="w-2/3 space-y-4">
+                <div className="flex gap-2">
+                  <Textarea 
+                    placeholder="Exemple: Montre-moi l'évolution de l'utilisation des engins sur les 6 prochains mois et leur répartition par zone"
+                    value={userPrompt}
+                    onChange={(e) => setUserPrompt(e.target.value)}
+                    className="min-h-24"
+                  />
+                </div>
+                <Button 
+                  className="ml-auto flex items-center" 
+                  onClick={handlePromptSubmit}
+                  disabled={isProcessingPrompt || !userPrompt.trim()}
+                >
+                  {isProcessingPrompt ? (
+                    <>
+                      <Loader2 size={16} className="mr-2 animate-spin" />
+                      Analyse en cours...
+                    </>
+                  ) : (
+                    <>
+                      <SendHorizonal size={16} className="mr-2" />
+                      Générer le tableau de bord
+                    </>
+                  )}
+                </Button>
+                
+                {customDashboard.length > 0 && (
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    {customDashboard.map((chart, index) => (
+                      <Card key={index}>
+                        <CardContent className="pt-6">
+                          <ChartWidget
+                            title={chart.title}
+                            data={chart.data}
+                            type={chart.type}
+                            colors={chart.colors}
+                            height={240}
+                          />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

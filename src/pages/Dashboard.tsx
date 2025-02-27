@@ -319,6 +319,7 @@ const Dashboard = () => {
 
   const [activeTab, setActiveTab] = useState('main');
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // État pour le formulaire d'ajout de widget
   const [isAddWidgetOpen, setIsAddWidgetOpen] = useState(false);
@@ -327,14 +328,17 @@ const Dashboard = () => {
   const [newWidgetWidth, setNewWidgetWidth] = useState<Widget['width']>('1/3');
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
+    if (!isEditMode) return;
     setDraggedWidgetId(id);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    if (!isEditMode) return;
     e.preventDefault();
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetId: string) => {
+    if (!isEditMode) return;
     e.preventDefault();
     
     if (!draggedWidgetId || draggedWidgetId === targetId) return;
@@ -354,6 +358,8 @@ const Dashboard = () => {
   };
 
   const handleRemoveWidget = (id: string) => {
+    if (!isEditMode) return;
+    
     const currentWidgets = getCurrentWidgets();
     const updatedWidgets = currentWidgets.filter(widget => widget.id !== id);
     updateCurrentWidgets(updatedWidgets);
@@ -382,6 +388,15 @@ const Dashboard = () => {
     setNewWidgetWidth('1/3');
     
     toast.success('Nouveau widget ajouté');
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+    if (!isEditMode) {
+      toast.info('Mode édition activé. Vous pouvez maintenant déplacer et supprimer des widgets.');
+    } else {
+      toast.success('Modifications sauvegardées');
+    }
   };
 
   const getDefaultPropsForType = (type: WidgetType) => {
@@ -547,7 +562,10 @@ const Dashboard = () => {
         <div className="flex items-center space-x-2">
           <Dialog open={isAddWidgetOpen} onOpenChange={setIsAddWidgetOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center">
+              <Button 
+                className="flex items-center" 
+                disabled={!isEditMode}
+              >
                 <Plus size={16} className="mr-2" />
                 Ajouter un widget
               </Button>
@@ -623,9 +641,13 @@ const Dashboard = () => {
             </DialogContent>
           </Dialog>
           
-          <Button variant="outline">
+          <Button 
+            variant={isEditMode ? "default" : "outline"} 
+            onClick={toggleEditMode}
+            className={isEditMode ? "bg-amber-500 hover:bg-amber-600" : ""}
+          >
             <Edit size={16} className="mr-2" />
-            Mode édition
+            {isEditMode ? "Terminer l'édition" : "Mode édition"}
           </Button>
         </div>
       </div>
@@ -652,12 +674,21 @@ const Dashboard = () => {
               onDragStart={handleDragStart}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
+              isEditMode={isEditMode}
             >
               {renderWidget(widget)}
             </DraggableWidget>
           </div>
         ))}
       </div>
+      
+      {isEditMode && getCurrentWidgets().length === 0 && (
+        <div className="text-center p-12 border-2 border-dashed border-gray-300 rounded-lg">
+          <p className="text-muted-foreground">
+            Aucun widget dans cet onglet. Cliquez sur "Ajouter un widget" pour commencer.
+          </p>
+        </div>
+      )}
     </DashboardLayout>
   );
 };

@@ -12,8 +12,8 @@ import {
   Line, 
   Bar, 
   XAxis, 
-  YAxis, A
-  rea, 
+  YAxis,
+  Area, 
   Tooltip, 
   Legend, 
   CartesianGrid, 

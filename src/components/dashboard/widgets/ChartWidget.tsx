@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,9 @@ import {
   Pie, 
   Cell
 } from 'recharts';
-import { ChevronDown, Download, BarChart2, LineChart as LineChartIcon, PieChart as PieChartIcon } from 'lucide-react';
+import { ChevronDown, Download, BarChart2, LineChart as LineChartIcon, PieChart as PieChartIcon, FilePdf, Trash2, Edit3 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 type ChartType = 'bar' | 'line' | 'area' | 'pie' | 'composed';
 
@@ -65,6 +67,33 @@ const downloadCSV = (data: any[], filename: string) => {
   a.click();
 };
 
+// Fonction pour télécharger en PDF
+const downloadPDF = async (elementRef: React.RefObject<HTMLDivElement>, filename: string) => {
+  if (!elementRef.current) return;
+  
+  try {
+    const canvas = await html2canvas(elementRef.current, {
+      scale: 2,
+      useCORS: true,
+      logging: false
+    });
+    
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm'
+    });
+    
+    const imgWidth = 280;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+    pdf.save(`${filename}.pdf`);
+  } catch (error) {
+    console.error("Erreur lors de la génération du PDF:", error);
+  }
+};
+
 const ChartWidget: React.FC<ChartWidgetProps> = ({
   title,
   data,
@@ -75,6 +104,13 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({
   showControls = true
 }) => {
   const [chartType, setChartType] = useState<ChartType>(type);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(title);
+  const chartRef = useRef<HTMLDivElement>(null);
+  
+  const handleSaveEdit = () => {
+    setIsEditing(false);
+  };
   
   const renderChart = () => {
     const keys = Object.keys(data[0]).filter(key => key !== 'name');
@@ -202,9 +238,21 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({
   };
 
   return (
-    <Card className={`h-full overflow-hidden dashboard-widget ${className}`}>
+    <Card className={`h-full overflow-hidden dashboard-widget ${className}`} ref={chartRef}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-medium">{title}</CardTitle>
+        {isEditing ? (
+          <input
+            type="text"
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            onBlur={handleSaveEdit}
+            onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
+            className="text-lg font-medium border-b border-border focus:outline-none"
+            autoFocus
+          />
+        ) : (
+          <CardTitle className="text-lg font-medium">{editedTitle || title}</CardTitle>
+        )}
         {showControls && (
           <div className="flex items-center space-x-2">
             <DropdownMenu>
@@ -237,13 +285,39 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({
               </DropdownMenuContent>
             </DropdownMenu>
             
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-8 w-8">
+                  <Download size={15} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => downloadCSV(data, editedTitle || title)}>
+                  <Download className="mr-2 h-4 w-4" />
+                  <span>CSV</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => downloadPDF(chartRef, editedTitle || title)}>
+                  <FilePdf className="mr-2 h-4 w-4" />
+                  <span>PDF</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
             <Button 
               variant="outline" 
               size="icon" 
               className="h-8 w-8"
-              onClick={() => downloadCSV(data, title)}
+              onClick={() => setIsEditing(true)}
             >
-              <Download size={15} />
+              <Edit3 size={15} />
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 size={15} />
             </Button>
           </div>
         )}

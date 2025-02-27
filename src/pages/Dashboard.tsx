@@ -6,15 +6,13 @@ import { Card } from '@/components/ui/card';
 import StatCard from '@/components/dashboard/widgets/StatCard';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import DraggableWidget from '@/components/dashboard/widgets/DraggableWidget';
-import { Box, Calendar, Edit, FileText, Link2, PackagePlus, Plus, Printer, Tag, Download } from 'lucide-react';
+import { Box, Calendar, Edit, FileText, Link2, PackagePlus, Plus, Printer, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 // Sample data for the charts
 const monthlyData = [
@@ -477,61 +475,12 @@ const Dashboard = () => {
     }
   };
 
-  const exportToPDF = () => {
-    if (!dashboardRef.current) return;
-
-    toast.info('Génération du PDF en cours...');
-
-    const dashboardElement = dashboardRef.current;
-    const currentTab = activeTab;
-    const currentDate = new Date().toLocaleDateString();
-    
-    // Création du PDF
-    html2canvas(dashboardElement).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('l', 'mm', 'a4');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      // Ajout d'un en-tête au PDF
-      pdf.setFillColor(112, 86, 171); // Couleur LogiTag
-      pdf.rect(0, 0, pdfWidth, 20, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(16);
-      pdf.text(`Tableau de bord LogiTag - ${currentTab.toUpperCase()}`, 14, 12);
-      
-      // Ajout d'informations supplémentaires
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(10);
-      pdf.text(`Date: ${currentDate}`, pdfWidth - 50, 30);
-      pdf.text('Généré par: Système LogiTag', pdfWidth - 70, 35);
-      
-      // Ajout de l'image du dashboard
-      pdf.addImage(imgData, 'PNG', 10, 40, pdfWidth - 20, pdfHeight - 20);
-      
-      // Ajout d'un pied de page
-      pdf.setFontSize(8);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text('© 2023 LogiTag. Tous droits réservés.', pdfWidth / 2, pdfHeight + 30, { align: 'center' });
-      
-      pdf.save(`logitag-dashboard-${currentTab}-${new Date().toISOString().split('T')[0]}.pdf`);
-      
-      toast.success('PDF généré avec succès!');
-    });
-  };
-
   return (
     <DashboardLayout title="Tableau de bord">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         
         <div className="flex items-center space-x-2">
-          <Button variant="outline" onClick={exportToPDF}>
-            <Download size={16} className="mr-2" />
-            Exporter en PDF
-          </Button>
-          
           <Dialog open={isAddWidgetOpen} onOpenChange={setIsAddWidgetOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center">

@@ -15,7 +15,8 @@ import {
   ClipboardList, 
   FileText, 
   Database,
-  Wifi
+  Wifi,
+  Brain
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -125,6 +126,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           label="Dashboard" 
           isActive={path === '/'} 
           expanded={expanded}
+        />
+        <NavItem 
+          to="/ai-predictions" 
+          icon={<Brain size={18} />} 
+          label="IA & Prédictions" 
+          isActive={path === '/ai-predictions'} 
+          expanded={expanded}
+          className="bg-purple-50 text-purple-700 hover:bg-purple-100"
         />
         <NavItem 
           to="/resume" 

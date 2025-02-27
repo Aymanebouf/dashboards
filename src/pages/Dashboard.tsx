@@ -1,5 +1,6 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,46 +14,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
-// Sample data for the charts
-const monthlyData = [
-  { name: 'January', 'Engin Tagged': 65, 'Engin Enter': 28, 'Engin Exit': 20 },
-  { name: 'February', 'Engin Tagged': 59, 'Engin Enter': 48, 'Engin Exit': 90 },
-  { name: 'March', 'Engin Tagged': 80, 'Engin Enter': 40, 'Engin Exit': 30 },
-  { name: 'April', 'Engin Tagged': 81, 'Engin Enter': 19, 'Engin Exit': 40 },
-  { name: 'May', 'Engin Tagged': 56, 'Engin Enter': 86, 'Engin Exit': 75 },
-  { name: 'June', 'Engin Tagged': 55, 'Engin Enter': 27, 'Engin Exit': 15 },
-  { name: 'July', 'Engin Tagged': 40, 'Engin Enter': 90, 'Engin Exit': 48 },
-];
-
-// Analytical data
-const analyticalData = [
-  { name: 'Week 1', 'Utilisation': 78, 'Maintenance': 22, 'Idle': 10 },
-  { name: 'Week 2', 'Utilisation': 65, 'Maintenance': 15, 'Idle': 20 },
-  { name: 'Week 3', 'Utilisation': 70, 'Maintenance': 10, 'Idle': 20 },
-  { name: 'Week 4', 'Utilisation': 82, 'Maintenance': 8, 'Idle': 10 },
-];
-
-// AI predictions data
-const aiPredictionsData = [
-  { name: 'Aug', 'Actual': 65, 'Predicted': 68 },
-  { name: 'Sep', 'Actual': 59, 'Predicted': 57 },
-  { name: 'Oct', 'Actual': 80, 'Predicted': 82 },
-  { name: 'Nov', 'Actual': 81, 'Predicted': 78 },
-  { name: 'Dec', 'Actual': 56, 'Predicted': 58 },
-  { name: 'Jan', 'Predicted': 76 },
-  { name: 'Feb', 'Predicted': 84 },
-  { name: 'Mar', 'Predicted': 92 },
-];
-
-// Custom data for the table
-const tableData = [
-  { id: 1, name: "Bulldozer BX-250", status: "Actif", location: "Zone A", lastUsed: "2023-07-20" },
-  { id: 2, name: "Excavatrice EX-450", status: "Maintenance", location: "Atelier", lastUsed: "2023-07-15" },
-  { id: 3, name: "Chargeuse CL-300", status: "Actif", location: "Zone B", lastUsed: "2023-07-21" },
-  { id: 4, name: "Compacteur CP-100", status: "Inactif", location: "Entrepôt", lastUsed: "2023-07-10" },
-  { id: 5, name: "Grue GR-750", status: "Actif", location: "Zone C", lastUsed: "2023-07-19" },
-];
+import { 
+  fetchEquipment, 
+  fetchMonthlyData, 
+  fetchAnalyticalData, 
+  fetchAIPredictions, 
+  fetchStats, 
+  fetchStatusDistribution, 
+  fetchZoneDistribution 
+} from '@/services/api';
 
 // Types des widgets disponibles
 type WidgetType = 'stat' | 'chart' | 'table' | 'custom';
@@ -64,6 +34,7 @@ interface Widget {
   title: string;
   props: any;
   width: 'full' | '1/2' | '1/3' | '1/4';
+  dataSource?: string;
 }
 
 // Génération d'un ID unique
@@ -73,219 +44,278 @@ const generateId = () => {
 
 const Dashboard = () => {
   const dashboardRef = useRef<HTMLDivElement>(null);
-  const [widgets, setWidgets] = useState<Widget[]>([
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Engins tagués',
-      props: {
-        icon: <Box size={24} />,
-        value: '10/10',
-        progress: 100,
-        color: 'blue'
-      },
-      width: '1/4'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Tags utilisés',
-      props: {
-        icon: <Tag size={24} />,
-        value: '10/16',
-        progress: 62,
-        color: 'red'
-      },
-      width: '1/4'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Engins sur site',
-      props: {
-        icon: <Box size={24} />,
-        value: '10/10',
-        progress: 100,
-        color: 'green'
-      },
-      width: '1/4'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Tags à maintenir',
-      props: {
-        icon: <Tag size={24} />,
-        value: '0/16',
-        progress: 0,
-        color: 'gray'
-      },
-      width: '1/4'
-    },
-    {
-      id: generateId(),
-      type: 'chart',
-      title: 'Activité mensuelle',
-      props: {
-        data: monthlyData,
-        type: 'bar',
-        colors: ['#1E88E5', '#E91E63', '#66BB6A'],
-        height: 300
-      },
-      width: 'full'
-    }
-  ]);
+  
+  // Récupération des données depuis le backend via React Query
+  const { data: equipmentData, isLoading: isLoadingEquipment } = useQuery({
+    queryKey: ['equipment'],
+    queryFn: fetchEquipment
+  });
+  
+  const { data: monthlyData, isLoading: isLoadingMonthly } = useQuery({
+    queryKey: ['monthlyData'],
+    queryFn: fetchMonthlyData
+  });
+  
+  const { data: analyticalData, isLoading: isLoadingAnalytical } = useQuery({
+    queryKey: ['analyticalData'],
+    queryFn: fetchAnalyticalData
+  });
+  
+  const { data: aiPredictionsData, isLoading: isLoadingAIPredictions } = useQuery({
+    queryKey: ['aiPredictions'],
+    queryFn: fetchAIPredictions
+  });
+  
+  const { data: statsData, isLoading: isLoadingStats } = useQuery({
+    queryKey: ['stats'],
+    queryFn: fetchStats
+  });
+  
+  const { data: statusDistributionData, isLoading: isLoadingStatusDistribution } = useQuery({
+    queryKey: ['statusDistribution'],
+    queryFn: fetchStatusDistribution
+  });
+  
+  const { data: zoneDistributionData, isLoading: isLoadingZoneDistribution } = useQuery({
+    queryKey: ['zoneDistribution'],
+    queryFn: fetchZoneDistribution
+  });
 
-  // Widgets for analytics tab
-  const analyticsWidgets = [
-    {
-      id: generateId(),
-      type: 'chart',
-      title: 'Analyse d\'utilisation hebdomadaire',
-      props: {
-        data: analyticalData,
-        type: 'bar',
-        colors: ['#7056AB', '#F97CE5', '#1E88E5'],
-        height: 300
-      },
-      width: 'full'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Taux d\'utilisation',
-      props: {
-        icon: <Box size={24} />,
-        value: '75%',
-        progress: 75,
-        color: 'purple'
-      },
-      width: '1/3'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Efficacité opérationnelle',
-      props: {
-        icon: <Calendar size={24} />,
-        value: '82%',
-        progress: 82,
-        color: 'green'
-      },
-      width: '1/3'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Durée moyenne des tâches',
-      props: {
-        icon: <FileText size={24} />,
-        value: '4.2h',
-        progress: 70,
-        color: 'blue'
-      },
-      width: '1/3'
-    }
-  ];
+  const [widgets, setWidgets] = useState<Widget[]>([]);
+  const [analyticsWidgets, setAnalyticsWidgets] = useState<Widget[]>([]);
+  const [customWidgets, setCustomWidgets] = useState<Widget[]>([]);
+  const [aiWidgets, setAiWidgets] = useState<Widget[]>([]);
 
-  // Widgets for custom tab
-  const customWidgets = [
-    {
-      id: generateId(),
-      type: 'table',
-      title: 'Équipements sur site',
-      props: {
-        data: tableData
-      },
-      width: 'full'
-    },
-    {
-      id: generateId(),
-      type: 'chart',
-      title: 'Répartition par statut',
-      props: {
-        data: [
-          { name: 'Actif', value: 60 },
-          { name: 'Maintenance', value: 20 },
-          { name: 'Inactif', value: 20 }
-        ],
-        type: 'pie',
-        colors: ['#66BB6A', '#FFC107', '#E91E63'],
-        height: 250
-      },
-      width: '1/2'
-    },
-    {
-      id: generateId(),
-      type: 'chart',
-      title: 'Répartition par zone',
-      props: {
-        data: [
-          { name: 'Zone A', value: 40 },
-          { name: 'Zone B', value: 30 },
-          { name: 'Zone C', value: 20 },
-          { name: 'Entrepôt', value: 5 },
-          { name: 'Atelier', value: 5 }
-        ],
-        type: 'pie',
-        colors: ['#1E88E5', '#7056AB', '#66BB6A', '#FFC107', '#E91E63'],
-        height: 250
-      },
-      width: '1/2'
+  // Initialisation des widgets avec les données du backend
+  useEffect(() => {
+    if (statsData && monthlyData) {
+      setWidgets([
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Engins tagués',
+          props: {
+            icon: <Box size={24} />,
+            value: statsData.taggedEngines.value,
+            progress: statsData.taggedEngines.progress,
+            color: 'blue'
+          },
+          width: '1/4',
+          dataSource: 'stats'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Tags utilisés',
+          props: {
+            icon: <Tag size={24} />,
+            value: statsData.usedTags.value,
+            progress: statsData.usedTags.progress,
+            color: 'red'
+          },
+          width: '1/4',
+          dataSource: 'stats'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Engins sur site',
+          props: {
+            icon: <Box size={24} />,
+            value: statsData.enginesOnSite.value,
+            progress: statsData.enginesOnSite.progress,
+            color: 'green'
+          },
+          width: '1/4',
+          dataSource: 'stats'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Tags à maintenir',
+          props: {
+            icon: <Tag size={24} />,
+            value: statsData.tagsToMaintain.value,
+            progress: statsData.tagsToMaintain.progress,
+            color: 'gray'
+          },
+          width: '1/4',
+          dataSource: 'stats'
+        },
+        {
+          id: generateId(),
+          type: 'chart',
+          title: 'Activité mensuelle',
+          props: {
+            data: monthlyData,
+            type: 'bar',
+            colors: ['#1E88E5', '#E91E63', '#66BB6A'],
+            height: 300
+          },
+          width: 'full',
+          dataSource: 'monthlyData'
+        }
+      ]);
     }
-  ];
+  }, [statsData, monthlyData]);
 
-  // Widgets for AI tab
-  const aiWidgets = [
-    {
-      id: generateId(),
-      type: 'chart',
-      title: 'Prédictions d\'utilisation',
-      props: {
-        data: aiPredictionsData,
-        type: 'line',
-        colors: ['#66BB6A', '#7056AB'],
-        height: 300
-      },
-      width: 'full'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Précision des prédictions',
-      props: {
-        icon: <Box size={24} />,
-        value: '92%',
-        progress: 92,
-        color: 'purple'
-      },
-      width: '1/3'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Anomalies détectées',
-      props: {
-        icon: <Tag size={24} />,
-        value: '3',
-        progress: 30,
-        color: 'red'
-      },
-      width: '1/3'
-    },
-    {
-      id: generateId(),
-      type: 'stat',
-      title: 'Maintenance prédictive',
-      props: {
-        icon: <Calendar size={24} />,
-        value: '5 jours',
-        progress: 80,
-        color: 'yellow'
-      },
-      width: '1/3'
+  // Initialisation des widgets d'analyse
+  useEffect(() => {
+    if (analyticalData) {
+      setAnalyticsWidgets([
+        {
+          id: generateId(),
+          type: 'chart',
+          title: 'Analyse d\'utilisation hebdomadaire',
+          props: {
+            data: analyticalData,
+            type: 'bar',
+            colors: ['#7056AB', '#F97CE5', '#1E88E5'],
+            height: 300
+          },
+          width: 'full',
+          dataSource: 'analyticalData'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Taux d\'utilisation',
+          props: {
+            icon: <Box size={24} />,
+            value: '75%',
+            progress: 75,
+            color: 'purple'
+          },
+          width: '1/3'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Efficacité opérationnelle',
+          props: {
+            icon: <Calendar size={24} />,
+            value: '82%',
+            progress: 82,
+            color: 'green'
+          },
+          width: '1/3'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Durée moyenne des tâches',
+          props: {
+            icon: <FileText size={24} />,
+            value: '4.2h',
+            progress: 70,
+            color: 'blue'
+          },
+          width: '1/3'
+        }
+      ]);
     }
-  ];
+  }, [analyticalData]);
+
+  // Initialisation des widgets personnalisés
+  useEffect(() => {
+    if (equipmentData && statusDistributionData && zoneDistributionData) {
+      setCustomWidgets([
+        {
+          id: generateId(),
+          type: 'table',
+          title: 'Équipements sur site',
+          props: {
+            data: equipmentData
+          },
+          width: 'full',
+          dataSource: 'equipmentData'
+        },
+        {
+          id: generateId(),
+          type: 'chart',
+          title: 'Répartition par statut',
+          props: {
+            data: statusDistributionData,
+            type: 'pie',
+            colors: ['#66BB6A', '#FFC107', '#E91E63'],
+            height: 250
+          },
+          width: '1/2',
+          dataSource: 'statusDistributionData'
+        },
+        {
+          id: generateId(),
+          type: 'chart',
+          title: 'Répartition par zone',
+          props: {
+            data: zoneDistributionData,
+            type: 'pie',
+            colors: ['#1E88E5', '#7056AB', '#66BB6A', '#FFC107', '#E91E63'],
+            height: 250
+          },
+          width: '1/2',
+          dataSource: 'zoneDistributionData'
+        }
+      ]);
+    }
+  }, [equipmentData, statusDistributionData, zoneDistributionData]);
+
+  // Initialisation des widgets IA
+  useEffect(() => {
+    if (aiPredictionsData) {
+      setAiWidgets([
+        {
+          id: generateId(),
+          type: 'chart',
+          title: 'Prédictions d\'utilisation',
+          props: {
+            data: aiPredictionsData,
+            type: 'line',
+            colors: ['#66BB6A', '#7056AB'],
+            height: 300
+          },
+          width: 'full',
+          dataSource: 'aiPredictionsData'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Précision des prédictions',
+          props: {
+            icon: <Box size={24} />,
+            value: '92%',
+            progress: 92,
+            color: 'purple'
+          },
+          width: '1/3'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Anomalies détectées',
+          props: {
+            icon: <Tag size={24} />,
+            value: '3',
+            progress: 30,
+            color: 'red'
+          },
+          width: '1/3'
+        },
+        {
+          id: generateId(),
+          type: 'stat',
+          title: 'Maintenance prédictive',
+          props: {
+            icon: <Calendar size={24} />,
+            value: '5 jours',
+            progress: 80,
+            color: 'yellow'
+          },
+          width: '1/3'
+        }
+      ]);
+    }
+  }, [aiPredictionsData]);
 
   const [activeTab, setActiveTab] = useState('main');
   const [draggedWidgetId, setDraggedWidgetId] = useState<string | null>(null);
@@ -309,21 +339,24 @@ const Dashboard = () => {
     
     if (!draggedWidgetId || draggedWidgetId === targetId) return;
     
-    const newWidgets = [...widgets];
+    const currentWidgets = getCurrentWidgets();
+    const newWidgets = [...currentWidgets];
     const draggedIndex = newWidgets.findIndex(w => w.id === draggedWidgetId);
     const targetIndex = newWidgets.findIndex(w => w.id === targetId);
     
     const [draggedWidget] = newWidgets.splice(draggedIndex, 1);
     newWidgets.splice(targetIndex, 0, draggedWidget);
     
-    setWidgets(newWidgets);
+    updateCurrentWidgets(newWidgets);
     setDraggedWidgetId(null);
     
     toast.success('Widget repositionné avec succès');
   };
 
   const handleRemoveWidget = (id: string) => {
-    setWidgets(widgets.filter(widget => widget.id !== id));
+    const currentWidgets = getCurrentWidgets();
+    const updatedWidgets = currentWidgets.filter(widget => widget.id !== id);
+    updateCurrentWidgets(updatedWidgets);
     toast.success('Widget supprimé avec succès');
   };
 
@@ -341,7 +374,8 @@ const Dashboard = () => {
       width: newWidgetWidth
     };
 
-    setWidgets([...widgets, newWidget]);
+    const currentWidgets = getCurrentWidgets();
+    updateCurrentWidgets([...currentWidgets, newWidget]);
     setIsAddWidgetOpen(false);
     setNewWidgetTitle('');
     setNewWidgetType('stat');
@@ -361,14 +395,14 @@ const Dashboard = () => {
         };
       case 'chart':
         return {
-          data: monthlyData,
+          data: monthlyData || [],
           type: 'bar',
           colors: ['#1E88E5', '#E91E63', '#66BB6A'],
           height: 300
         };
       case 'table':
         return {
-          data: tableData
+          data: equipmentData || []
         };
       case 'custom':
       default:
@@ -414,7 +448,7 @@ const Dashboard = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {widget.props.data.map((row: any) => (
+                  {widget.props.data?.map((row: any) => (
                     <TableRow key={row.id}>
                       <TableCell>{row.id}</TableCell>
                       <TableCell>{row.name}</TableCell>
@@ -474,6 +508,36 @@ const Dashboard = () => {
         return widgets;
     }
   };
+
+  const updateCurrentWidgets = (updatedWidgets: Widget[]) => {
+    switch (activeTab) {
+      case 'analytics':
+        setAnalyticsWidgets(updatedWidgets);
+        break;
+      case 'custom':
+        setCustomWidgets(updatedWidgets);
+        break;
+      case 'ai':
+        setAiWidgets(updatedWidgets);
+        break;
+      case 'main':
+      default:
+        setWidgets(updatedWidgets);
+        break;
+    }
+  };
+
+  // Afficher un indicateur de chargement si les données sont en cours de chargement
+  if (isLoadingStats || isLoadingMonthly) {
+    return (
+      <DashboardLayout title="Tableau de bord">
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-logitag-primary"></div>
+          <p className="ml-4 text-lg">Chargement des données...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Tableau de bord">

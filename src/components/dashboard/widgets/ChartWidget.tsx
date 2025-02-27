@@ -21,7 +21,7 @@ import {
   Pie, 
   Cell
 } from 'recharts';
-import { ChevronDown, Download, BarChart2, LineChart as LineChartIcon, PieChart as PieChartIcon, FilePdf, Trash2, Edit3 } from 'lucide-react';
+import { ChevronDown, Download, BarChart2, LineChart as LineChartIcon, PieChart as PieChartIcon, FileText, Trash2, Edit3 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
@@ -297,7 +297,7 @@ const ChartWidget: React.FC<ChartWidgetProps> = ({
                   <span>CSV</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => downloadPDF(chartRef, editedTitle || title)}>
-                  <FilePdf className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4" />
                   <span>PDF</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

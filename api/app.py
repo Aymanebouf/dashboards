@@ -7,7 +7,13 @@ import json
 from datetime import datetime, timedelta
 import random
 import os
-import openai
+try:
+    from dotenv import load_dotenv
+    # Charger les variables d'environnement depuis .env
+    load_dotenv()
+    dotenv_loaded = True
+except ImportError:
+    dotenv_loaded = False
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +22,11 @@ CORS(app)
 openai_api_key = os.environ.get('OPENAI_API_KEY')
 if openai_api_key:
     openai.api_key = openai_api_key
+    print("Clé API OpenAI configurée avec succès!")
+else:
+    print("ATTENTION: Clé API OpenAI non configurée. Certaines fonctionnalités ne seront pas disponibles.")
+    if not dotenv_loaded:
+        print("Le module python-dotenv n'a pas pu être chargé. La configuration via .env n'est pas disponible.")
 
 # Fixation de la seed aléatoire pour assurer la cohérence des données
 random.seed(42)

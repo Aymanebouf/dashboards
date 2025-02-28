@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,12 +7,25 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Calendar, Download, FileInput, LineChart, Loader2, RefreshCcw, SendHorizonal, Upload } from 'lucide-react';
+import { 
+  AlertCircle,
+  Brain, 
+  Calendar, 
+  Download, 
+  FileInput, 
+  LineChart, 
+  Loader2, 
+  RefreshCcw, 
+  SendHorizonal, 
+  Upload 
+} from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { fetchAIPredictions } from '@/services/api';
 import { Textarea } from '@/components/ui/textarea';
+import { analyzeWithAI, checkAIConfiguration, AIAnalysisResponse } from '@/services/aiService';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Données fictives pour les tendances
 const trendsData = [
@@ -48,12 +61,32 @@ const AIPredictions = () => {
   const [isProcessingPrompt, setIsProcessingPrompt] = useState(false);
   const [aiRemarks, setAiRemarks] = useState<string[]>([]);
   const [customDashboard, setCustomDashboard] = useState<any[]>([]);
+  const [isAIConfigured, setIsAIConfigured] = useState<boolean | null>(null);
+  const [aiResponse, setAIResponse] = useState<AIAnalysisResponse | null>(null);
 
   const { data: predictions, isLoading, refetch } = useQuery({
     queryKey: ['predictions', selectedModel, timeRange],
     queryFn: fetchAIPredictions,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+  // Vérifier si l'IA est configurée au chargement
+  useEffect(() => {
+    const checkConfiguration = async () => {
+      try {
+        const configured = await checkAIConfiguration();
+        setIsAIConfigured(configured);
+        if (!configured) {
+          console.log('L\'IA n\'est pas configurée. Une clé API OpenAI est nécessaire.');
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification de l'API OpenAI:", error);
+        setIsAIConfigured(false);
+      }
+    };
+    
+    checkConfiguration();
+  }, []);
 
   const handleModelTrain = () => {
     setIsTraining(true);
@@ -88,75 +121,62 @@ const AIPredictions = () => {
     }
   };
 
-  const generateInsight = () => {
+  const generateInsight = async () => {
+    if (!isAIConfigured) {
+      toast.error('L\'IA n\'est pas configurée. Veuillez configurer une clé API OpenAI.');
+      return;
+    }
+    
     toast.info('Génération des insights en cours...');
     
-    setTimeout(() => {
+    try {
+      const result = await analyzeWithAI("Générer des insights généraux sur l'utilisation des équipements et leur maintenance");
+      setAIResponse(result);
+      
       toast.success('Insights générés avec succès !');
       
-      // Simuler un rapport d'IA
+      // Afficher un rapport dans le toast
       toast(
         <div className="space-y-2">
           <h3 className="font-medium">Insights d'IA</h3>
-          <p className="text-sm">
-            Les données montrent une augmentation constante de l'utilisation des engins sur les 3 prochains mois, avec une prévision de pic en Mars. Maintenir une réserve de tags est recommandé.
-          </p>
+          <p className="text-sm">{result.remarks[0]}</p>
         </div>
       );
-    }, 2000);
+    } catch (error) {
+      toast.error('Erreur lors de la génération des insights');
+      console.error(error);
+    }
   };
 
-  const handlePromptSubmit = () => {
+  const handlePromptSubmit = async () => {
     if (!userPrompt.trim()) return;
+    if (!isAIConfigured) {
+      toast.error('L\'IA n\'est pas configurée. Veuillez configurer une clé API OpenAI.');
+      return;
+    }
 
     setIsProcessingPrompt(true);
     toast.info('Analyse de votre demande en cours...');
 
-    // Simuler le traitement de la demande
-    setTimeout(() => {
-      setIsProcessingPrompt(false);
+    try {
+      // Utiliser l'API réelle au lieu de la simulation
+      const result = await analyzeWithAI(userPrompt);
+      setAIResponse(result);
       
-      // Ajouter des remarques d'IA
-      const newRemarks = [
-        ...aiRemarks,
-        `Je comprends que vous cherchez à analyser "${userPrompt.substring(0, 30)}..."`,
-        "J'ai créé un tableau de bord personnalisé basé sur votre demande.",
-        "Les données indiquent une tendance positive pour les prochains mois.",
-        "Recommandation: Surveillez l'utilisation des équipements pour optimiser les ressources."
-      ];
+      // Mettre à jour les remarques
+      setAiRemarks(result.remarks);
       
-      setAiRemarks(newRemarks);
-      
-      // Générer un tableau de bord personnalisé
-      setCustomDashboard([
-        {
-          title: "Prévision adaptée",
-          type: "line",
-          data: [
-            { name: 'Janv', 'Valeur': 45, 'Prévision': 50 },
-            { name: 'Févr', 'Valeur': 52, 'Prévision': 55 },
-            { name: 'Mars', 'Valeur': 58, 'Prévision': 60 },
-            { name: 'Avri', 'Valeur': 63, 'Prévision': 67 },
-            { name: 'Mai', 'Valeur': 69, 'Prévision': 75 },
-            { name: 'Juin', 'Valeur': null, 'Prévision': 80 },
-          ],
-          colors: ['#1E88E5', '#66BB6A']
-        },
-        {
-          title: "Répartition d'utilisation",
-          type: "pie",
-          data: [
-            { name: 'Zone A', value: 45 },
-            { name: 'Zone B', value: 30 },
-            { name: 'Zone C', value: 25 }
-          ],
-          colors: ['#1E88E5', '#66BB6A', '#FFC107']
-        }
-      ]);
+      // Mettre à jour le tableau de bord personnalisé
+      setCustomDashboard(result.customInsights);
       
       toast.success('Tableau de bord personnalisé généré !');
+    } catch (error) {
+      toast.error('Erreur lors de l\'analyse de votre demande');
+      console.error(error);
+    } finally {
+      setIsProcessingPrompt(false);
       setUserPrompt('');
-    }, 2500);
+    }
   };
 
   return (
@@ -172,6 +192,17 @@ const AIPredictions = () => {
           Générer des insights
         </Button>
       </div>
+      
+      {isAIConfigured === false && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Configuration requise</AlertTitle>
+          <AlertDescription>
+            Une clé API OpenAI est nécessaire pour utiliser les fonctionnalités d'IA avancées. 
+            Veuillez configurer la variable d'environnement OPENAI_API_KEY sur votre serveur.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="grid grid-cols-1 gap-6 mb-6">
         <Card>
@@ -212,7 +243,7 @@ const AIPredictions = () => {
                 <Button 
                   className="ml-auto flex items-center" 
                   onClick={handlePromptSubmit}
-                  disabled={isProcessingPrompt || !userPrompt.trim()}
+                  disabled={isProcessingPrompt || !userPrompt.trim() || isAIConfigured === false}
                 >
                   {isProcessingPrompt ? (
                     <>

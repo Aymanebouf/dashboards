@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Brain, SendHorizonal, Loader2 } from 'lucide-react';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
+import { analyzeWithAI, checkAIConfiguration, AIAnalysisResponse } from '@/services/aiService';
+import { toast } from 'sonner';
+import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('principal');
@@ -14,57 +17,62 @@ const Dashboard = () => {
   const [isProcessingPrompt, setIsProcessingPrompt] = useState(false);
   const [aiRemarks, setAiRemarks] = useState<string[]>([]);
   const [customDashboard, setCustomDashboard] = useState<any[]>([]);
+  const [isAIConfigured, setIsAIConfigured] = useState<boolean | null>(null);
+  const [aiResponse, setAIResponse] = useState<AIAnalysisResponse | null>(null);
+
+  // Vérifier si l'IA est configurée au chargement
+  useEffect(() => {
+    const checkConfiguration = async () => {
+      try {
+        const configured = await checkAIConfiguration();
+        setIsAIConfigured(configured);
+        if (!configured) {
+          console.log('L\'IA n\'est pas configurée. Une clé API OpenAI est nécessaire.');
+          toast.error('Veuillez configurer la clé API OpenAI pour utiliser les fonctionnalités d\'IA');
+        } else {
+          console.log('L\'IA est correctement configurée');
+        }
+      } catch (error) {
+        console.error("Erreur lors de la vérification de l'API OpenAI:", error);
+        setIsAIConfigured(false);
+      }
+    };
+    
+    checkConfiguration();
+  }, []);
 
   // Fonction pour traiter la demande de l'utilisateur
-  const handlePromptSubmit = () => {
+  const handlePromptSubmit = async () => {
     if (!userPrompt.trim()) return;
+    if (!isAIConfigured) {
+      toast.error('L\'IA n\'est pas configurée. Veuillez configurer une clé API OpenAI.');
+      return;
+    }
 
     setIsProcessingPrompt(true);
-    
-    // Simulation du traitement de la demande
-    setTimeout(() => {
+    toast.info('Analyse de votre demande en cours...');
+
+    try {
+      console.log("Envoi de la requête à l'API avec prompt:", userPrompt);
+      // Utiliser l'API réelle pour analyser le prompt
+      const result = await analyzeWithAI(userPrompt);
+      console.log("Réponse de l'API:", result);
+      
+      setAIResponse(result);
+      
+      // Mettre à jour les remarques avec les résultats réels
+      setAiRemarks(result.remarks);
+      
+      // Mettre à jour le tableau de bord personnalisé avec les données réelles
+      setCustomDashboard(result.customInsights);
+      
+      toast.success('Tableau de bord personnalisé généré !');
+    } catch (error) {
+      console.error('Erreur lors de l\'analyse:', error);
+      toast.error('Erreur lors de l\'analyse de votre demande');
+    } finally {
       setIsProcessingPrompt(false);
-      
-      // Ajouter des remarques d'IA
-      const newRemarks = [
-        ...aiRemarks,
-        `J'ai analysé votre demande : "${userPrompt.substring(0, 30)}..."`,
-        "Voici ce que j'ai trouvé :",
-        "Les données montrent une tendance à la baisse pour certains engins.",
-        "Recommandation: Un entretien plus régulier pourrait améliorer la disponibilité."
-      ];
-      
-      setAiRemarks(newRemarks);
-      
-      // Générer un tableau de bord personnalisé
-      setCustomDashboard([
-        {
-          title: "Analyse des retards d'engins",
-          type: "bar",
-          data: [
-            { name: 'Jan', 'Nombre d\'engins': 12, 'Retards': 5 },
-            { name: 'Fév', 'Nombre d\'engins': 15, 'Retards': 7 },
-            { name: 'Mar', 'Nombre d\'engins': 18, 'Retards': 8 },
-            { name: 'Avr', 'Nombre d\'engins': 16, 'Retards': 4 },
-            { name: 'Mai', 'Nombre d\'engins': 14, 'Retards': 3 },
-            { name: 'Juin', 'Nombre d\'engins': 13, 'Retards': 6 },
-          ],
-          colors: ['#1E88E5', '#E91E63']
-        },
-        {
-          title: "Causes des retards",
-          type: "pie",
-          data: [
-            { name: 'Maintenance', value: 45 },
-            { name: 'Disponibilité', value: 30 },
-            { name: 'Problèmes techniques', value: 25 }
-          ],
-          colors: ['#1E88E5', '#66BB6A', '#FFC107']
-        }
-      ]);
-      
-      setUserPrompt('');
-    }, 2000);
+    }
   };
 
   return (
@@ -228,7 +236,7 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Nouvel onglet pour IA & Prédictions */}
+          {/* Onglet IA & Prédictions */}
           <TabsContent value="ia-predictions" className="space-y-4">
             <Card>
               <CardHeader>
@@ -239,25 +247,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4">
-                  {/* Fenêtre des remarques de l'IA */}
-                  <div className="w-1/3 bg-muted/20 rounded-lg p-4 space-y-3 h-64 overflow-y-auto border">
-                    <h3 className="text-sm font-medium">Remarques de l'IA</h3>
-                    {aiRemarks.length > 0 ? (
-                      <div className="space-y-2">
-                        {aiRemarks.map((remark, index) => (
-                          <div key={index} className="p-2 bg-background border rounded-md text-xs">
-                            {remark}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                        Les remarques de l'IA apparaîtront ici après votre demande
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Zone de saisie et résultats */}
+                  {/* MODIFICATION: Zone de saisie maintenant à gauche (2/3 de la largeur) */}
                   <div className="w-2/3 space-y-4">
                     <div className="flex gap-2">
                       <Textarea 
@@ -270,7 +260,7 @@ const Dashboard = () => {
                     <Button 
                       className="ml-auto flex items-center" 
                       onClick={handlePromptSubmit}
-                      disabled={isProcessingPrompt || !userPrompt.trim()}
+                      disabled={isProcessingPrompt || !userPrompt.trim() || isAIConfigured === false}
                     >
                       {isProcessingPrompt ? (
                         <>
@@ -301,6 +291,24 @@ const Dashboard = () => {
                             </CardContent>
                           </Card>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* MODIFICATION: Fenêtre des remarques maintenant à droite (1/3 de la largeur) */}
+                  <div className="w-1/3 bg-muted/20 rounded-lg p-4 space-y-3 h-64 overflow-y-auto border">
+                    <h3 className="text-sm font-medium">Remarques de l'IA</h3>
+                    {aiRemarks.length > 0 ? (
+                      <div className="space-y-2">
+                        {aiRemarks.map((remark, index) => (
+                          <div key={index} className="p-2 bg-background border rounded-md text-xs">
+                            {remark}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                        Les remarques de l'IA apparaîtront ici après votre demande
                       </div>
                     )}
                   </div>

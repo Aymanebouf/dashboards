@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [customDashboard, setCustomDashboard] = useState<any[]>([]);
   const [isAIConfigured, setIsAIConfigured] = useState<boolean | null>(null);
   const [aiResponse, setAIResponse] = useState<AIAnalysisResponse | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Vérifier si l'IA est configurée au chargement
   useEffect(() => {
@@ -29,12 +30,15 @@ const Dashboard = () => {
         if (!configured) {
           console.log('L\'IA n\'est pas configurée. Une clé API OpenAI est nécessaire.');
           toast.error('Veuillez configurer la clé API OpenAI pour utiliser les fonctionnalités d\'IA');
+          setErrorMessage('La clé API OpenAI n\'est pas configurée. Veuillez vérifier le fichier api/.env');
         } else {
           console.log('L\'IA est correctement configurée');
+          setErrorMessage(null);
         }
       } catch (error) {
         console.error("Erreur lors de la vérification de l'API OpenAI:", error);
         setIsAIConfigured(false);
+        setErrorMessage('Impossible de se connecter à l\'API. Vérifiez que le serveur Flask est en cours d\'exécution.');
       }
     };
     
@@ -44,32 +48,56 @@ const Dashboard = () => {
   // Fonction pour traiter la demande de l'utilisateur
   const handlePromptSubmit = async () => {
     if (!userPrompt.trim()) return;
+    
+    // Vérification de la configuration de l'IA avant l'envoi
     if (!isAIConfigured) {
       toast.error('L\'IA n\'est pas configurée. Veuillez configurer une clé API OpenAI.');
+      setErrorMessage('La clé API OpenAI n\'est pas configurée. Veuillez vérifier le fichier api/.env');
       return;
     }
 
     setIsProcessingPrompt(true);
+    setErrorMessage(null);
     toast.info('Analyse de votre demande en cours...');
 
     try {
       console.log("Envoi de la requête à l'API avec prompt:", userPrompt);
+      
       // Utiliser l'API réelle pour analyser le prompt
       const result = await analyzeWithAI(userPrompt);
       console.log("Réponse de l'API:", result);
       
+      // Vérification que les données reçues sont bien formatées
+      if (!result || !result.remarks || !result.customInsights) {
+        console.error("Format de réponse inattendu:", result);
+        throw new Error("Format de réponse inattendu");
+      }
+      
+      // Mise à jour de l'état avec les données reçues
       setAIResponse(result);
-      
-      // Mettre à jour les remarques avec les résultats réels
-      setAiRemarks(result.remarks);
-      
-      // Mettre à jour le tableau de bord personnalisé avec les données réelles
-      setCustomDashboard(result.customInsights);
+      setAiRemarks(Array.isArray(result.remarks) ? result.remarks : []);
+      setCustomDashboard(Array.isArray(result.customInsights) ? result.customInsights : []);
       
       toast.success('Tableau de bord personnalisé généré !');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur lors de l\'analyse:', error);
-      toast.error('Erreur lors de l\'analyse de votre demande');
+      
+      // Gestion spécifique des erreurs
+      if (error.code === 'ERR_NETWORK') {
+        setErrorMessage('Impossible de se connecter au serveur API. Vérifiez que le serveur Flask est en cours d\'exécution.');
+        toast.error('Erreur de connexion au serveur API');
+      } else if (error.response && error.response.data && error.response.data.error) {
+        setErrorMessage(`Erreur: ${error.response.data.error}`);
+        toast.error(error.response.data.error);
+      } else {
+        setErrorMessage('Une erreur s\'est produite lors de l\'analyse de votre demande');
+        toast.error('Erreur lors de l\'analyse de votre demande');
+      }
+      
+      // Réinitialisation des données pour éviter d'afficher des résultats partiels/incorrects
+      setAIResponse(null);
+      setAiRemarks([]);
+      setCustomDashboard([]);
     } finally {
       setIsProcessingPrompt(false);
     }
@@ -246,8 +274,16 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {errorMessage && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Erreur</AlertTitle>
+                    <AlertDescription>{errorMessage}</AlertDescription>
+                  </Alert>
+                )}
+                
                 <div className="flex gap-4">
-                  {/* MODIFICATION: Zone de saisie maintenant à gauche (2/3 de la largeur) */}
+                  {/* Zone de saisie à gauche (2/3 de la largeur) */}
                   <div className="w-2/3 space-y-4">
                     <div className="flex gap-2">
                       <Textarea 
@@ -276,16 +312,16 @@ const Dashboard = () => {
                     </Button>
                     
                     {/* Tableau de bord personnalisé généré */}
-                    {customDashboard.length > 0 && (
-                      <div className="grid grid-cols-2 gap-4 mt-6">
+                    {customDashboard && customDashboard.length > 0 && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                         {customDashboard.map((chart, index) => (
                           <Card key={index}>
                             <CardContent className="pt-6">
                               <ChartWidget
-                                title={chart.title}
-                                data={chart.data}
-                                type={chart.type}
-                                colors={chart.colors}
+                                title={chart.title || ""}
+                                data={Array.isArray(chart.data) ? chart.data : []}
+                                type={chart.type || "bar"}
+                                colors={Array.isArray(chart.colors) ? chart.colors : ["#1E88E5"]}
                                 height={240}
                               />
                             </CardContent>
@@ -295,10 +331,10 @@ const Dashboard = () => {
                     )}
                   </div>
                   
-                  {/* MODIFICATION: Fenêtre des remarques maintenant à droite (1/3 de la largeur) */}
+                  {/* Fenêtre des remarques à droite (1/3 de la largeur) */}
                   <div className="w-1/3 bg-muted/20 rounded-lg p-4 space-y-3 h-64 overflow-y-auto border">
                     <h3 className="text-sm font-medium">Remarques de l'IA</h3>
-                    {aiRemarks.length > 0 ? (
+                    {aiRemarks && aiRemarks.length > 0 ? (
                       <div className="space-y-2">
                         {aiRemarks.map((remark, index) => (
                           <div key={index} className="p-2 bg-background border rounded-md text-xs">

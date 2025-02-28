@@ -44,8 +44,25 @@ export interface AIAnalysisResponse {
 export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse> => {
   try {
     console.log('Sending analyze request with prompt:', prompt);
+    
+    // Vérifier la connexion au serveur avant d'envoyer la requête complète
+    // Cela permet de détecter rapidement les problèmes de connexion
+    try {
+      await api.get('/');
+    } catch (connectionError) {
+      console.error('Erreur de connexion au serveur API:', connectionError);
+      throw { code: 'ERR_NETWORK', message: 'Impossible de se connecter au serveur API' };
+    }
+    
     const response = await api.post<AIAnalysisResponse>('/analyze-with-ai', { prompt });
     console.log('Received AI response:', response.data);
+    
+    // Valider la structure de la réponse
+    if (!response.data || !response.data.remarks || !response.data.customInsights) {
+      console.error('Format de réponse invalide:', response.data);
+      throw new Error('Format de réponse invalide reçu du serveur');
+    }
+    
     return response.data;
   } catch (error) {
     console.error('Error analyzing with AI:', error);
@@ -59,9 +76,19 @@ export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse>
 export const checkAIConfiguration = async (): Promise<boolean> => {
   try {
     console.log('Vérification de la configuration de l\'IA...');
+    
+    // Vérifier d'abord si le serveur est accessible
+    try {
+      await api.get('/');
+    } catch (connectionError) {
+      console.error('Erreur de connexion au serveur API lors de la vérification:', connectionError);
+      throw { code: 'ERR_NETWORK', message: 'Impossible de se connecter au serveur API' };
+    }
+    
     const response = await api.post<AIAnalysisResponse>('/analyze-with-ai', { 
       prompt: 'Vérification de la configuration de l\'IA' 
     });
+    
     console.log('Configuration de l\'IA vérifiée avec succès');
     return true;
   } catch (error: any) {

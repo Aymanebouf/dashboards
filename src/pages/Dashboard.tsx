@@ -5,11 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Brain, SendHorizonal, Loader2, AlertCircle } from 'lucide-react';
+import { Brain, SendHorizonal, Loader2, AlertCircle, Filter } from 'lucide-react';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import { analyzeWithAI, checkAIConfiguration, AIAnalysisResponse } from '@/services/aiService';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('principal');
@@ -20,6 +27,11 @@ const Dashboard = () => {
   const [isAIConfigured, setIsAIConfigured] = useState<boolean | null>(null);
   const [aiResponse, setAIResponse] = useState<AIAnalysisResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Nouveaux états pour la configuration du tableau de bord
+  const [parameter1, setParameter1] = useState('engins');
+  const [parameter2, setParameter2] = useState('temps');
+  const [kpiData, setKpiData] = useState<any>(null);
 
   // Vérifier si l'IA est configurée au chargement
   useEffect(() => {
@@ -44,6 +56,220 @@ const Dashboard = () => {
     
     checkConfiguration();
   }, []);
+
+  // Effet pour générer les données KPI en fonction des paramètres
+  useEffect(() => {
+    generateKPIData(parameter1, parameter2);
+  }, [parameter1, parameter2]);
+
+  // Fonction pour générer les données KPI en fonction des paramètres sélectionnés
+  const generateKPIData = (param1: string, param2: string) => {
+    console.log(`Génération des KPI pour: ${param1} et ${param2}`);
+    
+    // Définitions des valeurs de base pour tous les types de données
+    const baseData = {
+      totals: {
+        engins: 2845,
+        produits: 1560,
+        heures: 12450
+      },
+      growth: {
+        engins: 12.5,
+        produits: 8.3,
+        heures: -2.1
+      },
+      distribution: {
+        engins: [
+          { name: 'Bulldozer', value: 35 },
+          { name: 'Grue', value: 25 },
+          { name: 'Excavateur', value: 20 },
+          { name: 'Chariot élévateur', value: 15 },
+          { name: 'Autre', value: 5 }
+        ],
+        produits: [
+          { name: 'Béton', value: 45 },
+          { name: 'Acier', value: 30 },
+          { name: 'Bois', value: 15 },
+          { name: 'Autre', value: 10 }
+        ],
+        temps: [
+          { name: 'Matin', value: 40 },
+          { name: 'Après-midi', value: 45 },
+          { name: 'Soir', value: 15 }
+        ]
+      },
+      monthly: {
+        engins: [
+          { name: 'Jan', value: 45 },
+          { name: 'Fév', value: 52 },
+          { name: 'Mar', value: 49 },
+          { name: 'Avr', value: 63 },
+          { name: 'Mai', value: 58 },
+          { name: 'Juin', value: 64 }
+        ],
+        produits: [
+          { name: 'Jan', value: 35 },
+          { name: 'Fév', value: 42 },
+          { name: 'Mar', value: 39 },
+          { name: 'Avr', value: 53 },
+          { name: 'Mai', value: 48 },
+          { name: 'Juin', value: 54 }
+        ],
+        temps: [
+          { name: 'Jan', value: 160 },
+          { name: 'Fév', value: 165 },
+          { name: 'Mar', value: 170 },
+          { name: 'Avr', value: 175 },
+          { name: 'Mai', value: 180 },
+          { name: 'Juin', value: 185 }
+        ]
+      },
+      status: {
+        engins: [
+          { name: 'Actif', value: 65 },
+          { name: 'En pause', value: 20 },
+          { name: 'En maintenance', value: 15 }
+        ],
+        produits: [
+          { name: 'En stock', value: 55 },
+          { name: 'En transit', value: 25 },
+          { name: 'Épuisé', value: 20 }
+        ],
+        temps: [
+          { name: 'Productif', value: 70 },
+          { name: 'Pause', value: 20 },
+          { name: 'Inactif', value: 10 }
+        ]
+      }
+    };
+    
+    // Créer des données spécifiques en fonction des paramètres sélectionnés
+    let combinedData: any = {
+      kpiCards: [],
+      charts: []
+    };
+    
+    // KPI Cards - toujours 4 cartes avec des statistiques pertinentes
+    if (param1 === 'engins' && param2 === 'temps') {
+      combinedData.kpiCards = [
+        { title: 'Heures d\'utilisation', value: '12,450', trend: '+3.2%', description: 'Total des heures d\'utilisation des engins' },
+        { title: 'Taux d\'activité', value: '65%', trend: '+5.2%', description: 'Pourcentage du temps où les engins sont actifs' },
+        { title: 'Engins en service', value: '1,845', trend: '+12.5%', description: 'Nombre total d\'engins actuellement en service' },
+        { title: 'Temps moyen/engin', value: '4.3h', trend: '-2.1%', description: 'Temps moyen d\'utilisation par engin par jour' }
+      ];
+      
+      combinedData.charts = [
+        { 
+          title: 'Utilisation des engins par période', 
+          type: 'bar',
+          data: [
+            { name: 'Matin', 'Bulldozer': 25, 'Grue': 15, 'Excavateur': 20 },
+            { name: 'Après-midi', 'Bulldozer': 30, 'Grue': 20, 'Excavateur': 25 },
+            { name: 'Soir', 'Bulldozer': 15, 'Grue': 10, 'Excavateur': 10 }
+          ],
+          colors: ['#1E88E5', '#42A5F5', '#90CAF9']
+        },
+        {
+          title: 'Répartition du temps par type d\'engin',
+          type: 'pie',
+          data: [
+            { name: 'Bulldozer', value: 42 },
+            { name: 'Grue', value: 28 },
+            { name: 'Excavateur', value: 30 }
+          ],
+          colors: ['#4CAF50', '#FFC107', '#F44336']
+        }
+      ];
+    } 
+    else if (param1 === 'engins' && param2 === 'produits') {
+      combinedData.kpiCards = [
+        { title: 'Production totale', value: '1,560t', trend: '+8.3%', description: 'Tonnes de matériaux déplacés par les engins' },
+        { title: 'Rendement moyen', value: '0.55t/h', trend: '+5.0%', description: 'Tonnes traitées par heure de fonctionnement' },
+        { title: 'Engins actifs', value: '1,845', trend: '+12.5%', description: 'Nombre d\'engins contribuant à la production' },
+        { title: 'Efficacité', value: '78%', trend: '+2.3%', description: 'Ratio entre production réelle et capacité théorique' }
+      ];
+      
+      combinedData.charts = [
+        { 
+          title: 'Production par type d\'engin', 
+          type: 'bar',
+          data: [
+            { name: 'Béton', 'Bulldozer': 120, 'Grue': 200, 'Excavateur': 80 },
+            { name: 'Acier', 'Bulldozer': 50, 'Grue': 300, 'Excavateur': 30 },
+            { name: 'Bois', 'Bulldozer': 30, 'Grue': 150, 'Excavateur': 20 }
+          ],
+          colors: ['#1E88E5', '#42A5F5', '#90CAF9']
+        },
+        {
+          title: 'Allocation des engins par produit',
+          type: 'pie',
+          data: [
+            { name: 'Béton', value: 45 },
+            { name: 'Acier', value: 35 },
+            { name: 'Bois', value: 20 }
+          ],
+          colors: ['#4CAF50', '#FFC107', '#F44336']
+        }
+      ];
+    }
+    else if (param1 === 'produits' && param2 === 'temps') {
+      combinedData.kpiCards = [
+        { title: 'Production horaire', value: '125kg/h', trend: '+7.3%', description: 'Taux de production moyenne par heure' },
+        { title: 'Heures de production', value: '8,750h', trend: '+2.1%', description: 'Temps total dédié à la production' },
+        { title: 'Taux de livraison', value: '94%', trend: '+3.5%', description: 'Pourcentage de livraisons dans les délais' },
+        { title: 'Temps d\'inactivité', value: '1,230h', trend: '-5.2%', description: 'Heures d\'arrêt de production' }
+      ];
+      
+      combinedData.charts = [
+        { 
+          title: 'Production par période de la journée', 
+          type: 'bar',
+          data: [
+            { name: 'Béton', 'Matin': 520, 'Après-midi': 630, 'Soir': 210 },
+            { name: 'Acier', 'Matin': 320, 'Après-midi': 450, 'Soir': 130 },
+            { name: 'Bois', 'Matin': 180, 'Après-midi': 220, 'Soir': 80 }
+          ],
+          colors: ['#1E88E5', '#42A5F5', '#90CAF9']
+        },
+        {
+          title: 'Répartition du temps de production',
+          type: 'pie',
+          data: [
+            { name: 'Béton', value: 55 },
+            { name: 'Acier', value: 30 },
+            { name: 'Bois', value: 15 }
+          ],
+          colors: ['#4CAF50', '#FFC107', '#F44336']
+        }
+      ];
+    }
+    else {
+      // Configuration par défaut si la combinaison n'est pas spécifiquement définie
+      combinedData.kpiCards = [
+        { title: 'Total Engins', value: '2,845', trend: '+12.5%', description: 'Nombre total d\'engins' },
+        { title: 'Activations', value: '1,257', trend: '+5.2%', description: 'Nombre d\'activations' },
+        { title: 'Production', value: '1,560t', trend: '+8.3%', description: 'Tonnes produites' },
+        { title: 'Heures totales', value: '12,450h', trend: '+3.2%', description: 'Heures d\'opération' }
+      ];
+      
+      combinedData.charts = [
+        { 
+          title: 'Performance mensuelle', 
+          type: 'line',
+          data: baseData.monthly[param1 === 'temps' ? 'engins' : param1],
+          colors: ['#1E88E5']
+        },
+        {
+          title: `Répartition par ${param1}`,
+          type: 'pie',
+          data: baseData.distribution[param1],
+          colors: ['#4CAF50', '#FFC107', '#F44336', '#9C27B0', '#673AB7']
+        }
+      ];
+    }
+    
+    setKpiData(combinedData);
+  };
 
   // Fonction pour traiter la demande de l'utilisateur
   const handlePromptSubmit = async () => {
@@ -128,91 +354,101 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="principal" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Engins
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">2,845</div>
-                  <p className="text-xs text-muted-foreground">
-                    +12.5% par rapport au mois dernier
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Activations
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">1,257</div>
-                  <p className="text-xs text-muted-foreground">
-                    +5.2% par rapport au mois dernier
-                  </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Alertes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">48</div>
-                  <p className="text-xs text-muted-foreground">
-                    -2.5% par rapport au mois dernier
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Sélecteurs de paramètres */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Filter className="mr-2 h-5 w-5 text-gray-500" />
+                  Configuration du tableau de bord
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Paramètre 1</label>
+                    <Select 
+                      value={parameter1} 
+                      onValueChange={setParameter1}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez un paramètre" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="engins">Engins</SelectItem>
+                        <SelectItem value="produits">Produits</SelectItem>
+                        <SelectItem value="temps">Temps</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Paramètre 2</label>
+                    <Select 
+                      value={parameter2} 
+                      onValueChange={setParameter2}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez un paramètre" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="engins">Engins</SelectItem>
+                        <SelectItem value="produits">Produits</SelectItem>
+                        <SelectItem value="temps">Temps</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Utilisation des engins</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartWidget
-                    title=""
-                    data={[
-                      { name: 'Jan', value: 45 },
-                      { name: 'Fév', value: 52 },
-                      { name: 'Mar', value: 49 },
-                      { name: 'Avr', value: 63 },
-                      { name: 'Mai', value: 58 },
-                      { name: 'Juin', value: 64 },
-                    ]}
-                    type="bar"
-                    colors={['#1E88E5']}
-                    height={300}
-                  />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Types d'engins</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartWidget
-                    title=""
-                    data={[
-                      { name: 'Bulldozer', value: 35 },
-                      { name: 'Grue', value: 25 },
-                      { name: 'Excavateur', value: 20 },
-                      { name: 'Chariot élévateur', value: 15 },
-                      { name: 'Autre', value: 5 },
-                    ]}
-                    type="pie"
-                    colors={['#1E88E5', '#42A5F5', '#90CAF9', '#BBDEFB', '#E3F2FD']}
-                    height={300}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+            {/* KPI Cards */}
+            {kpiData && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {kpiData.kpiCards.map((card: any, index: number) => (
+                  <Card key={index}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {card.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{card.value}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {card.trend.startsWith('+') ? (
+                          <span className="text-green-500">{card.trend}</span>
+                        ) : (
+                          <span className="text-red-500">{card.trend}</span>
+                        )} par rapport au mois dernier
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {card.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Charts */}
+            {kpiData && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {kpiData.charts.map((chart: any, index: number) => (
+                  <Card key={index}>
+                    <CardHeader>
+                      <CardTitle>{chart.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ChartWidget
+                        title=""
+                        data={chart.data}
+                        type={chart.type}
+                        colors={chart.colors}
+                        height={300}
+                      />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="analytique" className="space-y-4">

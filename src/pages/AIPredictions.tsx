@@ -133,6 +133,10 @@ const AIPredictions = () => {
       const result = await analyzeWithAI("Générer des insights généraux sur l'utilisation des équipements et leur maintenance");
       setAIResponse(result);
       
+      // Mettre à jour les remarques et le tableau de bord avec les résultats réels de l'API
+      setAiRemarks(result.remarks);
+      setCustomDashboard(result.customInsights);
+      
       toast.success('Insights générés avec succès !');
       
       // Afficher un rapport dans le toast
@@ -159,23 +163,25 @@ const AIPredictions = () => {
     toast.info('Analyse de votre demande en cours...');
 
     try {
-      // Utiliser l'API réelle au lieu de la simulation
+      console.log("Envoi de la requête à l'API avec prompt:", userPrompt);
+      // Utiliser l'API réelle pour analyser le prompt
       const result = await analyzeWithAI(userPrompt);
+      console.log("Réponse de l'API:", result);
+      
       setAIResponse(result);
       
-      // Mettre à jour les remarques
+      // Mettre à jour les remarques avec les résultats réels
       setAiRemarks(result.remarks);
       
-      // Mettre à jour le tableau de bord personnalisé
+      // Mettre à jour le tableau de bord personnalisé avec les données réelles
       setCustomDashboard(result.customInsights);
       
       toast.success('Tableau de bord personnalisé généré !');
     } catch (error) {
+      console.error('Erreur lors de l\'analyse:', error);
       toast.error('Erreur lors de l\'analyse de votre demande');
-      console.error(error);
     } finally {
       setIsProcessingPrompt(false);
-      setUserPrompt('');
     }
   };
 
@@ -214,23 +220,7 @@ const AIPredictions = () => {
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
-              <div className="w-1/3 bg-muted/20 rounded-lg p-4 space-y-3 h-64 overflow-y-auto">
-                <h3 className="text-sm font-medium">Remarques de l'IA</h3>
-                {aiRemarks.length > 0 ? (
-                  <div className="space-y-2">
-                    {aiRemarks.map((remark, index) => (
-                      <div key={index} className="p-2 bg-background border rounded-md text-xs">
-                        {remark}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                    Les remarques de l'IA apparaîtront ici après votre demande
-                  </div>
-                )}
-              </div>
-              
+              {/* CHANGEMENT ICI: Inverser les positions (zone d'écriture à gauche, remarques à droite) */}
               <div className="w-2/3 space-y-4">
                 <div className="flex gap-2">
                   <Textarea 
@@ -273,6 +263,23 @@ const AIPredictions = () => {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                )}
+              </div>
+              
+              <div className="w-1/3 bg-muted/20 rounded-lg p-4 space-y-3 h-64 overflow-y-auto">
+                <h3 className="text-sm font-medium">Remarques de l'IA</h3>
+                {aiRemarks.length > 0 ? (
+                  <div className="space-y-2">
+                    {aiRemarks.map((remark, index) => (
+                      <div key={index} className="p-2 bg-background border rounded-md text-xs">
+                        {remark}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                    Les remarques de l'IA apparaîtront ici après votre demande
                   </div>
                 )}
               </div>

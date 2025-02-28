@@ -34,7 +34,9 @@ export interface AIAnalysisResponse {
  */
 export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse> => {
   try {
+    console.log('Sending analyze request with prompt:', prompt);
     const response = await api.post<AIAnalysisResponse>('/analyze-with-ai', { prompt });
+    console.log('Received AI response:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error analyzing with AI:', error);

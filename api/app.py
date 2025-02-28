@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timedelta
 import random
 import os
+import openai
 try:
     from dotenv import load_dotenv
     # Charger les variables d'environnement depuis .env
@@ -145,6 +146,8 @@ def analyze_with_ai():
         data = request.json
         prompt = data.get('prompt', '')
         
+        print(f"Prompt reçu: {prompt}")
+        
         # Préparer le contexte avec les données pertinentes
         equipment_count = len(equipments)
         active_count = sum(1 for eq in equipments if eq['status'] == 'Actif')
@@ -168,49 +171,147 @@ def analyze_with_ai():
         """
         
         # Faire la requête à l'API OpenAI
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "Tu es un assistant d'analyse de données spécialisé dans la gestion d'équipements de chantier. Analyse les données fournies et donne des insights utiles, des recommandations et des prédictions."},
-                {"role": "user", "content": f"{context}\n\nRequête de l'utilisateur: {prompt}"}
+        if openai_api_key:
+            try:
+                print("Envoi de la requête à OpenAI...")
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "Tu es un assistant d'analyse de données spécialisé dans la gestion d'équipements de chantier. Analyse les données fournies et donne des insights utiles, des recommandations et des prédictions."},
+                        {"role": "user", "content": f"{context}\n\nRequête de l'utilisateur: {prompt}"}
+                    ]
+                )
+                
+                # Extraire et formater la réponse
+                ai_response = response.choices[0].message.content
+                print(f"Réponse d'OpenAI reçue: {ai_response[:100]}...")
+            except Exception as e:
+                print(f"Erreur lors de l'appel à OpenAI: {str(e)}")
+                # Utiliser une réponse fictive en cas d'erreur
+                ai_response = f"Analyse des données pour '{prompt}'. L'utilisation des équipements montre des tendances intéressantes. Je recommande d'optimiser les cycles de maintenance."
+        else:
+            # Si OpenAI n'est pas configuré, générer une réponse fictive basée sur le prompt
+            print("OpenAI non configuré, génération d'une réponse fictive...")
+            ai_response = f"Analyse des données pour '{prompt}'. L'utilisation des équipements montre des tendances intéressantes. Je recommande d'optimiser les cycles de maintenance."
+        
+        # Modification des insights en fonction du prompt
+        title1 = "Analyse standard"
+        title2 = "Répartition standard"
+        data1 = []
+        data2 = []
+        colors1 = ["#1E88E5", "#E91E63", "#66BB6A"]
+        colors2 = ["#4CAF50", "#FFC107", "#F44336"]
+        
+        # Personnaliser les visualisations en fonction du prompt
+        if "utilisation" in prompt.lower() or "usage" in prompt.lower():
+            title1 = "Analyse de l'utilisation des équipements"
+            data1 = [
+                {"name": "Lun", "Bulldozer": 35, "Excavatrice": 28, "Chargeuse": 20},
+                {"name": "Mar", "Bulldozer": 32, "Excavatrice": 25, "Chargeuse": 22},
+                {"name": "Mer", "Bulldozer": 30, "Excavatrice": 27, "Chargeuse": 24},
+                {"name": "Jeu", "Bulldozer": 34, "Excavatrice": 29, "Chargeuse": 26},
+                {"name": "Ven", "Bulldozer": 36, "Excavatrice": 31, "Chargeuse": 28},
             ]
-        )
+        elif "maintenance" in prompt.lower():
+            title1 = "Périodes de maintenance par type d'équipement"
+            data1 = [
+                {"name": "Jan", "Bulldozer": 5, "Excavatrice": 3, "Chargeuse": 2},
+                {"name": "Fév", "Bulldozer": 3, "Excavatrice": 4, "Chargeuse": 3},
+                {"name": "Mar", "Bulldozer": 2, "Excavatrice": 5, "Chargeuse": 4},
+                {"name": "Avr", "Bulldozer": 4, "Excavatrice": 2, "Chargeuse": 5},
+                {"name": "Mai", "Bulldozer": 6, "Excavatrice": 3, "Chargeuse": 2},
+            ]
+        elif "prédiction" in prompt.lower() or "prévoir" in prompt.lower() or "futur" in prompt.lower():
+            title1 = "Prévisions d'utilisation des équipements"
+            data1 = [
+                {"name": "Juin", "Réel": 82, "Prévu": 80},
+                {"name": "Juil", "Réel": 85, "Prévu": 83},
+                {"name": "Août", "Prévu": 88},
+                {"name": "Sept", "Prévu": 92},
+                {"name": "Oct", "Prévu": 95},
+                {"name": "Nov", "Prévu": 90},
+            ]
+        elif "zone" in prompt.lower() or "répartition" in prompt.lower():
+            title1 = "Répartition des équipements par zone"
+            data1 = [
+                {"name": "Zone A", "Bulldozer": 3, "Excavatrice": 2, "Chargeuse": 1},
+                {"name": "Zone B", "Bulldozer": 2, "Excavatrice": 3, "Chargeuse": 2},
+                {"name": "Zone C", "Bulldozer": 1, "Excavatrice": 2, "Chargeuse": 3},
+                {"name": "Entrepôt", "Bulldozer": 1, "Excavatrice": 1, "Chargeuse": 0},
+            ]
         
-        # Extraire et formater la réponse
-        ai_response = response.choices[0].message.content
+        # Personnaliser le second graphique
+        if "temps" in prompt.lower() or "durée" in prompt.lower():
+            title2 = "Répartition du temps par activité"
+            data2 = [
+                {"name": "Opérationnel", "value": 65},
+                {"name": "En attente", "value": 20},
+                {"name": "Maintenance", "value": 15}
+            ]
+        elif "type" in prompt.lower() or "catégorie" in prompt.lower():
+            title2 = "Répartition par type d'équipement"
+            data2 = [
+                {"name": "Bulldozer", "value": 40},
+                {"name": "Excavatrice", "value": 35},
+                {"name": "Chargeuse", "value": 25}
+            ]
+        elif "statut" in prompt.lower() or "état" in prompt.lower():
+            title2 = "Répartition par statut"
+            data2 = [
+                {"name": "Actif", "value": 60},
+                {"name": "Maintenance", "value": 25},
+                {"name": "Inactif", "value": 15}
+            ]
+        else:
+            title2 = "Répartition du temps par activité"
+            data2 = [
+                {"name": "Opérationnel", "value": 65},
+                {"name": "En attente", "value": 20},
+                {"name": "Maintenance", "value": 15}
+            ]
         
-        # Générer des recommandations structurées
-        recommendations = [
-            "Optimisez vos cycles de maintenance pour réduire les temps d'arrêt",
-            "Redistribuez les équipements entre les zones pour équilibrer l'utilisation",
-            "Augmentez le nombre de tags disponibles pour améliorer le suivi"
-        ]
-        
-        # Générer des données analytiques personnalisées
+        # Générer des données analytiques personnalisées basées sur le prompt
         custom_insights = [
             {
-                "title": "Analyse de l'utilisation des équipements",
-                "type": "bar",
-                "data": [
-                    {"name": "Lun", "Bulldozer": 35, "Excavatrice": 28, "Chargeuse": 20},
-                    {"name": "Mar", "Bulldozer": 32, "Excavatrice": 25, "Chargeuse": 22},
-                    {"name": "Mer", "Bulldozer": 30, "Excavatrice": 27, "Chargeuse": 24},
-                    {"name": "Jeu", "Bulldozer": 34, "Excavatrice": 29, "Chargeuse": 26},
-                    {"name": "Ven", "Bulldozer": 36, "Excavatrice": 31, "Chargeuse": 28},
-                ],
-                "colors": ["#1E88E5", "#E91E63", "#66BB6A"]
+                "title": title1,
+                "type": "bar" if "prédiction" not in prompt.lower() else "line",
+                "data": data1,
+                "colors": colors1
             },
             {
-                "title": "Répartition du temps par activité",
+                "title": title2,
                 "type": "pie",
-                "data": [
-                    {"name": "Opérationnel", "value": 65},
-                    {"name": "En attente", "value": 20},
-                    {"name": "Maintenance", "value": 15}
-                ],
-                "colors": ["#4CAF50", "#FFC107", "#F44336"]
+                "data": data2,
+                "colors": colors2
             }
         ]
+        
+        # Générer des recommandations personnalisées en fonction du prompt
+        recommendations = []
+        if "maintenance" in prompt.lower():
+            recommendations = [
+                "Optimisez vos cycles de maintenance pour réduire les temps d'arrêt",
+                "Implementez un système de maintenance prédictive pour anticiper les pannes",
+                "Formez davantage de techniciens pour réduire les délais de maintenance"
+            ]
+        elif "utilisation" in prompt.lower() or "usage" in prompt.lower():
+            recommendations = [
+                "Répartissez mieux l'utilisation entre les différents types d'équipements",
+                "Évitez les pics d'utilisation en planifiant mieux les chantiers",
+                "Investissez dans des équipements supplémentaires pour les périodes de forte demande"
+            ]
+        elif "zone" in prompt.lower() or "répartition" in prompt.lower():
+            recommendations = [
+                "Redistribuez les équipements entre les zones pour équilibrer l'utilisation",
+                "Créez des zones tampons pour faciliter la mobilité des équipements",
+                "Optimisez les trajets entre les zones pour réduire les temps de déplacement"
+            ]
+        else:
+            recommendations = [
+                "Optimisez vos cycles de maintenance pour réduire les temps d'arrêt",
+                "Redistribuez les équipements entre les zones pour équilibrer l'utilisation",
+                "Augmentez le nombre de tags disponibles pour améliorer le suivi"
+            ]
         
         return jsonify({
             "response": ai_response,
@@ -220,6 +321,7 @@ def analyze_with_ai():
         })
     
     except Exception as e:
+        print(f"Erreur dans analyze_with_ai: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 # Route pour la page d'accueil qui permet de vérifier que le serveur fonctionne

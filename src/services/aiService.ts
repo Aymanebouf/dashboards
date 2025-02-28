@@ -46,7 +46,6 @@ export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse>
     console.log('Sending analyze request with prompt:', prompt);
     
     // Vérifier la connexion au serveur avant d'envoyer la requête complète
-    // Cela permet de détecter rapidement les problèmes de connexion
     try {
       await api.get('/');
     } catch (connectionError) {
@@ -58,12 +57,20 @@ export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse>
     console.log('Received AI response:', response.data);
     
     // Valider la structure de la réponse
-    if (!response.data || !response.data.remarks || !response.data.customInsights) {
-      console.error('Format de réponse invalide:', response.data);
+    if (!response.data || typeof response.data !== 'object') {
+      console.error('Format de réponse invalide (n\'est pas un objet):', response.data);
       throw new Error('Format de réponse invalide reçu du serveur');
     }
     
-    return response.data;
+    // Garantir que toutes les propriétés nécessaires existent, même vides
+    const validatedResponse: AIAnalysisResponse = {
+      response: response.data.response || "",
+      remarks: Array.isArray(response.data.remarks) ? response.data.remarks : [],
+      recommendations: Array.isArray(response.data.recommendations) ? response.data.recommendations : [],
+      customInsights: Array.isArray(response.data.customInsights) ? response.data.customInsights : []
+    };
+    
+    return validatedResponse;
   } catch (error) {
     console.error('Error analyzing with AI:', error);
     throw error;
@@ -85,12 +92,21 @@ export const checkAIConfiguration = async (): Promise<boolean> => {
       throw { code: 'ERR_NETWORK', message: 'Impossible de se connecter au serveur API' };
     }
     
+    // Essayer d'obtenir une réponse de l'API pour vérifier si l'IA est configurée
     const response = await api.post<AIAnalysisResponse>('/analyze-with-ai', { 
       prompt: 'Vérification de la configuration de l\'IA' 
     });
     
-    console.log('Configuration de l\'IA vérifiée avec succès');
-    return true;
+    // Si on obtient une réponse avec les bonnes propriétés, l'API fonctionne
+    // même si c'est en mode simulation
+    const hasValidResponse = response.data && 
+                             response.data.remarks && 
+                             Array.isArray(response.data.remarks) &&
+                             response.data.customInsights &&
+                             Array.isArray(response.data.customInsights);
+    
+    console.log('Vérification terminée. Résultat:', hasValidResponse);
+    return hasValidResponse;
   } catch (error: any) {
     console.error('Erreur lors de la vérification de la configuration de l\'IA:', error);
     

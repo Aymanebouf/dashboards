@@ -207,7 +207,7 @@ def analyze_with_ai():
         maintenance_count = sum(1 for eq in equipments if eq['status'] == 'Maintenance')
         
         # Vérifier à nouveau la disponibilité de la clé API
-        if not has_openai:
+        if not has_openai or True:  # Forcer le mode simulation pour l'instant
             # Mode de simulation - ne nécessite pas OpenAI
             print("Mode simulation activé pour l'analyse IA")
             ai_remarks = generate_simulated_ai_response(prompt)
@@ -377,13 +377,37 @@ def analyze_with_ai():
             
             # Extraire et formater la réponse
             ai_response = response.choices[0].message.content
+            
+            # Découper la réponse en paragraphes pour les remarques
+            ai_remarks = ai_response.split('\n\n')
+            
+            # Créer une réponse structurée
+            return jsonify({
+                "response": ai_response,
+                "remarks": ai_remarks[:4],  # Limiter à 4 remarques pour l'affichage
+                "recommendations": [
+                    "Optimisez vos cycles de maintenance selon les recommandations de l'IA",
+                    "Suivez les tendances identifiées pour améliorer l'efficacité",
+                    "Implémentez les changements suggérés progressivement"
+                ],
+                "customInsights": custom_insights  # Utiliser les mêmes visualisations que le mode simulation
+            })
+            
         except Exception as e:
             print(f"Erreur lors de la génération de la réponse OpenAI: {str(e)}")
             print("Utilisation du mode de secours avec réponse simulée")
             ai_remarks = generate_simulated_ai_response(prompt)
-            ai_response = " ".join(ai_remarks)
-        
-        # ... keep existing code
+            
+            return jsonify({
+                "response": " ".join(ai_remarks),
+                "remarks": ai_remarks,
+                "recommendations": [
+                    "Optimisez vos cycles de maintenance pour réduire les temps d'arrêt",
+                    "Redistribuez les équipements entre les zones pour équilibrer l'utilisation",
+                    "Augmentez le nombre de tags disponibles pour améliorer le suivi"
+                ],
+                "customInsights": custom_insights
+            })
     
     except Exception as e:
         print(f"Erreur dans analyze_with_ai: {str(e)}")
@@ -401,6 +425,13 @@ def analyze_with_ai():
 @app.route('/', methods=['GET'])
 def home():
     return "Serveur API Flask en cours d'exécution. Accédez à /api/equipment pour voir les données."
+
+# Afficher les routes disponibles au démarrage
+@app.before_first_request
+def before_first_request():
+    print("📌 Routes disponibles :")
+    for rule in app.url_map.iter_rules():
+        print(f"{rule}")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

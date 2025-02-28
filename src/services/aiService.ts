@@ -2,23 +2,22 @@
 import axios from 'axios';
 import { toast } from 'sonner';
 
-// Création d'une instance axios avec une URL de base absolue pour éviter les problèmes de chemin relatif
+// Création d'une instance axios configurée pour le développement local
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:5000/api',  // Utilisation de l'IP locale exacte au lieu de localhost
-  timeout: 30000,  // Augmentation du timeout pour les connexions lentes
+  baseURL: 'http://localhost:5000/api',  // URL par défaut
+  timeout: 30000,  // Timeout augmenté pour les réponses lentes
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   }
 });
 
-// Intercepteur pour gérer les erreurs
+// Intercepteur pour gérer les erreurs de manière plus conviviale
 api.interceptors.response.use(
   response => response,
   error => {
     console.error('AI API Error:', error);
     
-    // Message d'erreur plus détaillé
     if (error.response && error.response.data && error.response.data.error === "Clé API OpenAI non configurée") {
       toast.info('API en mode simulation (sans clé OpenAI)');
     } else if (error.code === 'ERR_NETWORK') {
@@ -47,7 +46,6 @@ export interface AIAnalysisResponse {
 
 /**
  * Génère une réponse simulée en cas d'échec de connexion à l'API
- * Utilisé comme fallback si le serveur est inaccessible
  */
 const generateFallbackResponse = (prompt: string): AIAnalysisResponse => {
   console.log("Génération d'une réponse de secours locale (le serveur API est inaccessible)");
@@ -97,17 +95,20 @@ const generateFallbackResponse = (prompt: string): AIAnalysisResponse => {
  * Tente de se connecter à différentes URL d'API en cas d'échec
  */
 const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisResponse> => {
+  // Liste des URLs à essayer, dans l'ordre
   const endpoints = [
-    'http://127.0.0.1:5000/api/analyze-with-ai',
     'http://localhost:5000/api/analyze-with-ai',
-    'http://192.168.10.8:5000/api/analyze-with-ai'  // Utilisation de l'IP de votre machine (basé sur les logs)
+    'http://127.0.0.1:5000/api/analyze-with-ai',
+    'http://192.168.10.8:5000/api/analyze-with-ai'  // IP locale détectée dans vos logs
   ];
   
   let lastError = null;
   
+  // Essayer chaque endpoint jusqu'à ce qu'un fonctionne
   for (const endpoint of endpoints) {
     try {
       console.log(`Tentative de connexion à ${endpoint}...`);
+      
       const response = await axios.post<AIAnalysisResponse>(
         endpoint, 
         { prompt },
@@ -122,7 +123,7 @@ const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisRespon
       
       console.log(`Connexion réussie à ${endpoint}`, response.data);
       
-      // Valider la structure de la réponse
+      // Valider et normaliser la réponse
       const validatedResponse: AIAnalysisResponse = {
         response: response.data.response || "",
         remarks: Array.isArray(response.data.remarks) ? response.data.remarks : [],
@@ -130,7 +131,7 @@ const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisRespon
         customInsights: Array.isArray(response.data.customInsights) ? response.data.customInsights : []
       };
       
-      // Si on a réussi avec une URL alternative, mettre à jour l'URL de base pour les prochains appels
+      // Mettre à jour l'URL de base pour les prochains appels
       api.defaults.baseURL = endpoint.substring(0, endpoint.lastIndexOf('/'));
       console.log(`URL de base API mise à jour: ${api.defaults.baseURL}`);
       
@@ -145,14 +146,14 @@ const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisRespon
 };
 
 /**
- * Envoie une requête à l'IA pour analyser les données
+ * Fonction principale pour analyser les données avec l'IA
  */
 export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse> => {
   try {
     console.log('Envoi de la requête d\'analyse avec prompt:', prompt);
     
     try {
-      // Essayer d'utiliser notre méthode alternative pour contourner les problèmes de connexion
+      // Essayer les endpoints alternatifs
       return await tryAlternativeEndpoints(prompt);
     } catch (connectionError: any) {
       console.error('Échec de toutes les tentatives de connexion:', connectionError);
@@ -173,28 +174,27 @@ export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse>
 };
 
 /**
- * Vérifie si la configuration de l'IA est disponible sur le serveur
- * Retourne true si l'API est accessible (même en mode simulation)
+ * Vérifie si la configuration de l'IA est disponible
  */
 export const checkAIConfiguration = async (): Promise<boolean> => {
   try {
     console.log('Vérification de la configuration de l\'IA...');
     
     try {
-      // Essayer d'utiliser directement l'endpoint d'analyse qui devrait fonctionner en mode simulation
+      // Essayer d'utiliser directement l'endpoint d'analyse
       const result = await analyzeWithAI('Vérification de la configuration de l\'IA');
       console.log('API accessible (en mode simulation ou réel):', result);
       return true;
     } catch (error: any) {
       console.error('Erreur lors de la vérification de la configuration de l\'IA:', error);
       
-      // Si nous avons une réponse mais avec une erreur concernant la clé API, c'est que le serveur est accessible
+      // Si nous avons une réponse mais avec une erreur concernant la clé API
       if (error.response && error.response.data && error.response.data.error === "Clé API OpenAI non configurée") {
         console.log('Clé API OpenAI non configurée, mais le mode simulation est disponible');
         return true;
       }
       
-      // Si nous avons reçu une réponse générée par notre mode de secours local, nous considérons que l'API n'est pas accessible
+      // Si nous avons reçu une réponse du mode de secours local
       if (error.remarks && error.remarks.includes("Mode secours local activé")) {
         console.log('Mode secours local activé - le serveur API est inaccessible');
         return false;

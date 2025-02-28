@@ -12,7 +12,16 @@ api.interceptors.response.use(
   response => response,
   error => {
     console.error('AI API Error:', error);
-    toast.error('Erreur lors de la communication avec l\'API d\'IA. Vérifiez que le serveur est en cours d\'exécution.');
+    
+    // Message d'erreur plus détaillé
+    if (error.response && error.response.data && error.response.data.error === "Clé API OpenAI non configurée") {
+      toast.error('Clé API OpenAI non configurée. Veuillez configurer le fichier api/.env avec votre clé.');
+    } else if (error.code === 'ERR_NETWORK') {
+      toast.error('Impossible de se connecter au serveur API. Assurez-vous que le serveur Flask est en cours d\'exécution (cd api && python app.py)');
+    } else {
+      toast.error('Erreur lors de la communication avec l\'API d\'IA.');
+    }
+    
     return Promise.reject(error);
   }
 );
@@ -49,14 +58,26 @@ export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse>
  */
 export const checkAIConfiguration = async (): Promise<boolean> => {
   try {
+    console.log('Vérification de la configuration de l\'IA...');
     const response = await api.post<AIAnalysisResponse>('/analyze-with-ai', { 
       prompt: 'Vérification de la configuration de l\'IA' 
     });
+    console.log('Configuration de l\'IA vérifiée avec succès');
     return true;
   } catch (error: any) {
+    console.error('Erreur lors de la vérification de la configuration de l\'IA:', error);
+    
     if (error.response && error.response.data && error.response.data.error === "Clé API OpenAI non configurée") {
+      console.log('Clé API OpenAI non configurée');
       return false;
     }
+    
+    if (error.code === 'ERR_NETWORK') {
+      console.log('Erreur réseau - Le serveur API est-il en cours d\'exécution?');
+      toast.error('Impossible de se connecter au serveur API. Assurez-vous que le serveur Flask est en cours d\'exécution.');
+      return false;
+    }
+    
     // Si l'erreur est d'un autre type, on considère que c'est une autre raison
     return false;
   }

@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
@@ -13,14 +12,19 @@ try:
     # Charger les variables d'environnement depuis .env
     load_dotenv()
     dotenv_loaded = True
+    print("dotenv chargé avec succès")
 except ImportError:
     dotenv_loaded = False
+    print("Impossible de charger dotenv")
 
 app = Flask(__name__)
 CORS(app)
 
-# Configure OpenAI si la clé API est présente
+# Vérifier que la clé API est bien chargée
 openai_api_key = os.environ.get('OPENAI_API_KEY')
+print(f"Tentative de chargement de la clé API: {'Clé trouvée' if openai_api_key else 'Clé non trouvée'}")
+print(f"Variables d'environnement disponibles: {list(os.environ.keys())}")
+
 if openai_api_key:
     openai.api_key = openai_api_key
     print("Clé API OpenAI configurée avec succès!")
@@ -139,7 +143,10 @@ def get_zone_distribution():
 # NOUVELLE ROUTE: Analyser les données avec OpenAI
 @app.route('/api/analyze-with-ai', methods=['POST'])
 def analyze_with_ai():
-    if not openai_api_key:
+    # Vérifier à nouveau la disponibilité de la clé au moment de l'appel API
+    print(f"Vérification de la clé API lors de l'appel: {'Disponible' if openai.api_key else 'Non disponible'}")
+    
+    if not openai.api_key:
         return jsonify({"error": "Clé API OpenAI non configurée"}), 500
 
     try:
@@ -171,7 +178,7 @@ def analyze_with_ai():
         """
         
         # Faire la requête à l'API OpenAI
-        if openai_api_key:
+        if openai.api_key:
             try:
                 print("Envoi de la requête à OpenAI...")
                 response = openai.ChatCompletion.create(

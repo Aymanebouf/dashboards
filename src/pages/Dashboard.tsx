@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Brain, SendHorizonal, Loader2 } from 'lucide-react';
+import { Brain, SendHorizonal, Loader2, AlertCircle } from 'lucide-react';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import { analyzeWithAI, checkAIConfiguration, AIAnalysisResponse } from '@/services/aiService';
 import { toast } from 'sonner';
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('principal');

@@ -9,10 +9,10 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   asChild?: boolean;
   icon?: string;
   iconPos?: "left" | "right";
-  severity?: "secondary" | "success" | "info" | "warning" | "help" | "danger" | undefined;
+  severity?: "secondary" | "success" | "info" | "warning" | "help" | "danger" | "contrast" | undefined;
 }
 
-const mapVariantToSeverity = (variant?: string): "secondary" | "success" | "info" | "warning" | "help" | "danger" | undefined => {
+const mapVariantToSeverity = (variant?: string): "secondary" | "success" | "info" | "warning" | "help" | "danger" | "contrast" | undefined => {
   switch (variant) {
     case "destructive": return "danger";
     case "outline": return "secondary";

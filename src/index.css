@@ -4,170 +4,151 @@
 @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-@layer base {
-  :root {
-    --background: 240 33% 99%;
-    --foreground: 240 10% 3.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 262 54% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 5.9% 96.1%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 240 5.9% 90%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262 54% 50%;
-
-    --radius: 0.75rem;
-
-    --sidebar-background: 240 33% 99%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 262 54% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 240 5.9% 90%;
-    --sidebar-ring: 262 54% 50%;
-  }
-
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 262 54% 50%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 262 54% 50%;
-
-    --sidebar-background: 240 10% 3.9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 262 54% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 262 54% 50%;
-  }
+:root {
+  --primary-color: #7056AB;
+  --primary-color-light: rgba(112, 86, 171, 0.1);
+  --secondary-color: #F97CE5;
+  --text-color: #333;
+  --text-color-secondary: #666;
+  --surface-ground: #f8f9fa;
+  --surface-section: #ffffff;
+  --surface-card: #ffffff;
+  --surface-overlay: #ffffff;
+  --surface-border: #dfe7ef;
+  --surface-hover: #f6f9fc;
+  --logitag-primary: #7056AB;
+  --logitag-secondary: #F97CE5;
+  --logitag-blue: #1E88E5;
+  --logitag-red: #E91E63;
+  --logitag-green: #66BB6A;
+  --logitag-yellow: #FFC107;
+  --logitag-dark: #333333;
+  --logitag-light: #F5F5F7;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
-  }
-
-  /* Personnalisation des barres de défilement */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted rounded-full;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/30;
-  }
+/* Dark mode colors */
+html.dark {
+  --primary-color: #8B5CF6;
+  --primary-color-light: rgba(139, 92, 246, 0.1);
+  --secondary-color: #F97CE5;
+  --text-color: #f0f0f0;
+  --text-color-secondary: #aaa;
+  --surface-ground: #121212;
+  --surface-section: #1e1e1e;
+  --surface-card: #262626;
+  --surface-overlay: #2e2e2e;
+  --surface-border: #444;
+  --surface-hover: #333;
 }
 
-@layer components {
-  .glass-panel {
-    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border border-white/20 dark:border-slate-700/20 shadow-glass;
-  }
-  
-  .neo-panel {
-    @apply bg-white dark:bg-slate-800 shadow-neolight dark:shadow-neodark rounded-xl;
-  }
-  
-  .dashboard-card {
-    @apply bg-white dark:bg-slate-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden;
-  }
-  
-  .stat-card {
-    @apply p-4 rounded-xl flex flex-col h-full animate-fade-in;
-  }
-  
-  .dashboard-widget {
-    @apply relative p-5 rounded-xl transition-all duration-300 animate-scale-in;
-  }
-  
-  .widget-container {
-    @apply relative overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-300;
-  }
-  
-  .widget-header {
-    @apply flex items-center justify-between p-4 border-b border-border;
-  }
-  
-  .widget-content {
-    @apply p-4;
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
+  background-color: var(--surface-ground);
+  margin: 0;
+  padding: 0;
 }
 
-/* Animations pour les transitions de page */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(10px);
+/* Custom classes */
+.dashboard-card {
+  background: var(--surface-card);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 400ms, transform 400ms;
+.dashboard-card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-.page-transition-exit {
-  opacity: 1;
-  transform: translateY(0);
+.dashboard-widget {
+  position: relative;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  animation: scale-in 0.2s ease-out;
 }
 
-.page-transition-exit-active {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 300ms, transform 300ms;
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.widget-content {
+  padding: 1rem;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-gentle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* PrimeFlex utility extensions */
+.w-17rem {
+  width: 17rem !important;
+}
+
+.w-4rem {
+  width: 4rem !important;
+}
+
+.ml-17rem {
+  margin-left: 17rem !important;
+}
+
+.ml-4rem {
+  margin-left: 4rem !important;
 }

@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import pandas as pd
@@ -102,6 +101,67 @@ ai_predictions = [
     {'name': 'Jan', 'Predicted': 76},
     {'name': 'Feb', 'Predicted': 84},
     {'name': 'Mar', 'Predicted': 92},
+]
+
+# Données pour la durée de présence des engins chez les clients
+equipment_presence_data = [
+    {"client": "Client A", "equipment": "Bulldozer BX-250", "duration": 15, "unit": "jours"},
+    {"client": "Client B", "equipment": "Excavatrice EX-450", "duration": 8, "unit": "jours"},
+    {"client": "Client C", "equipment": "Chargeuse CL-300", "duration": 22, "unit": "jours"},
+    {"client": "Client A", "equipment": "Compacteur CP-100", "duration": 5, "unit": "jours"},
+    {"client": "Client D", "equipment": "Grue GR-750", "duration": 12, "unit": "jours"},
+]
+
+# Données pour le classement des clients par temps d'utilisation
+client_ranking_data = [
+    {"rank": 1, "client": "Client A", "totalDuration": 42, "unit": "jours", "equipmentCount": 5},
+    {"rank": 2, "client": "Client C", "totalDuration": 36, "unit": "jours", "equipmentCount": 3},
+    {"rank": 3, "client": "Client B", "totalDuration": 28, "unit": "jours", "equipmentCount": 4},
+    {"rank": 4, "client": "Client D", "totalDuration": 25, "unit": "jours", "equipmentCount": 2},
+    {"rank": 5, "client": "Client E", "totalDuration": 18, "unit": "jours", "equipmentCount": 2},
+]
+
+# Données pour l'utilisation des engins (distances parcourues)
+equipment_usage_data = [
+    {"equipment": "Bulldozer BX-250", "day": 12, "week": 68, "month": 280, "unit": "km"},
+    {"equipment": "Excavatrice EX-450", "day": 5, "week": 32, "month": 145, "unit": "km"},
+    {"equipment": "Chargeuse CL-300", "day": 8, "week": 45, "month": 190, "unit": "km"},
+    {"equipment": "Compacteur CP-100", "day": 3, "week": 18, "month": 82, "unit": "km"},
+    {"equipment": "Grue GR-750", "day": 0, "week": 0, "month": 0, "unit": "km"},
+]
+
+# Données pour l'analyse des stocks et mouvements
+stock_analysis_data = {
+    "daily": [
+        {"date": "2023-07-15", "incoming": 12, "outgoing": 8, "avgStorageTime": 3.5},
+        {"date": "2023-07-16", "incoming": 8, "outgoing": 10, "avgStorageTime": 3.2},
+        {"date": "2023-07-17", "incoming": 15, "outgoing": 12, "avgStorageTime": 2.8},
+        {"date": "2023-07-18", "incoming": 10, "outgoing": 9, "avgStorageTime": 3.0},
+        {"date": "2023-07-19", "incoming": 14, "outgoing": 11, "avgStorageTime": 3.3},
+        {"date": "2023-07-20", "incoming": 9, "outgoing": 13, "avgStorageTime": 2.9},
+        {"date": "2023-07-21", "incoming": 11, "outgoing": 10, "avgStorageTime": 3.1},
+    ],
+    "weekly": [
+        {"week": "Semaine 27", "incoming": 62, "outgoing": 58, "avgStorageTime": 3.2},
+        {"week": "Semaine 28", "incoming": 70, "outgoing": 65, "avgStorageTime": 3.0},
+        {"week": "Semaine 29", "incoming": 55, "outgoing": 60, "avgStorageTime": 3.3},
+        {"week": "Semaine 30", "incoming": 68, "outgoing": 63, "avgStorageTime": 2.9},
+    ],
+    "monthly": [
+        {"month": "Avril", "incoming": 250, "outgoing": 245, "avgStorageTime": 3.5},
+        {"month": "Mai", "incoming": 285, "outgoing": 275, "avgStorageTime": 3.2},
+        {"month": "Juin", "incoming": 270, "outgoing": 280, "avgStorageTime": 3.0},
+        {"month": "Juillet", "incoming": 290, "outgoing": 270, "avgStorageTime": 3.3},
+    ]
+}
+
+# Données pour la fréquence de visite chez les clients
+client_visit_data = [
+    {"client": "Client A", "visitCount": 15, "lastVisit": "2023-07-18", "daysElapsed": 3},
+    {"client": "Client B", "visitCount": 8, "lastVisit": "2023-07-10", "daysElapsed": 11},
+    {"client": "Client C", "visitCount": 22, "lastVisit": "2023-07-21", "daysElapsed": 0},
+    {"client": "Client D", "visitCount": 5, "lastVisit": "2023-06-30", "daysElapsed": 21},
+    {"client": "Client E", "visitCount": 12, "lastVisit": "2023-07-15", "daysElapsed": 6},
 ]
 
 # Route pour obtenir la liste des équipements
@@ -364,6 +424,76 @@ def analyze_with_ai():
             "recommendations": ["Vérifiez la configuration du serveur et réessayez"],
             "customInsights": []
         }), 500
+
+# Route pour obtenir les données de durée de présence des engins
+@app.route('/api/equipment-presence', methods=['GET'])
+def get_equipment_presence():
+    return jsonify(equipment_presence_data)
+
+# Route pour obtenir les données de classement des clients
+@app.route('/api/client-ranking', methods=['GET'])
+def get_client_ranking():
+    return jsonify(client_ranking_data)
+
+# Route pour obtenir les données d'utilisation des engins
+@app.route('/api/equipment-usage', methods=['GET'])
+def get_equipment_usage():
+    return jsonify(equipment_usage_data)
+
+# Route pour obtenir les données d'analyse des stocks
+@app.route('/api/stock-analysis', methods=['GET'])
+def get_stock_analysis():
+    period = request.args.get('period', 'daily')
+    if period in stock_analysis_data:
+        return jsonify(stock_analysis_data[period])
+    return jsonify(stock_analysis_data['daily'])
+
+# Route pour obtenir les données de fréquence de visite des clients
+@app.route('/api/client-visits', methods=['GET'])
+def get_client_visits():
+    return jsonify(client_visit_data)
+
+# Route pour obtenir les statistiques d'un tableau de bord spécifique
+@app.route('/api/dashboard-stats', methods=['GET'])
+def get_dashboard_stats():
+    dashboard_type = request.args.get('type', 'equipment-presence')
+    
+    stats = {
+        'equipment-presence': {
+            'stat1': {'title': 'Durée moyenne', 'value': '12.4 jours', 'progress': 62},
+            'stat2': {'title': 'Plus longue présence', 'value': '22 jours', 'progress': 88},
+            'stat3': {'title': 'Clients actifs', 'value': '5/8', 'progress': 63},
+            'stat4': {'title': 'Total jours', 'value': '62', 'progress': 78}
+        },
+        'client-ranking': {
+            'stat1': {'title': 'Client principal', 'value': 'Client A', 'progress': 100},
+            'stat2': {'title': 'Durée totale', 'value': '149 jours', 'progress': 85},
+            'stat3': {'title': 'Équipements utilisés', 'value': '16/20', 'progress': 80},
+            'stat4': {'title': 'Taux occupation', 'value': '78%', 'progress': 78}
+        },
+        'equipment-usage': {
+            'stat1': {'title': 'Distance totale', 'value': '697 km', 'progress': 70},
+            'stat2': {'title': 'Plus grande distance', 'value': '280 km', 'progress': 93},
+            'stat3': {'title': 'Équipements actifs', 'value': '4/5', 'progress': 80},
+            'stat4': {'title': 'Distance moyenne', 'value': '139 km', 'progress': 46}
+        },
+        'stock-analysis': {
+            'stat1': {'title': 'Produits entrants', 'value': '1095', 'progress': 73},
+            'stat2': {'title': 'Produits sortants', 'value': '1070', 'progress': 71},
+            'stat3': {'title': 'Temps stockage moyen', 'value': '3.2 jours', 'progress': 64},
+            'stat4': {'title': 'Taux rotation', 'value': '98%', 'progress': 98}
+        },
+        'client-visits': {
+            'stat1': {'title': 'Visites totales', 'value': '62', 'progress': 62},
+            'stat2': {'title': 'Client le plus visité', 'value': 'Client C', 'progress': 88},
+            'stat3': {'title': 'Clients non visités', 'value': '0/5', 'progress': 100},
+            'stat4': {'title': 'Visites moyennes', 'value': '12.4', 'progress': 52}
+        }
+    }
+    
+    if dashboard_type in stats:
+        return jsonify(stats[dashboard_type])
+    return jsonify(stats['equipment-presence'])
 
 # Route pour la page d'accueil qui permet de vérifier que le serveur fonctionne
 @app.route('/', methods=['GET'])

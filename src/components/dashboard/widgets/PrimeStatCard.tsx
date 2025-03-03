@@ -62,7 +62,7 @@ const PrimeStatCard: React.FC<StatCardProps> = ({
           <div className="text-900 font-bold text-2xl">{value}</div>
         </div>
         {icon && (
-          <div className={`flex align-items-center justify-content-center border-round-2xl shadow-2 w-3rem h-3rem ${color !== 'secondary' ? 'text-white' : 'text-primary'}`} 
+          <div className={`flex align-items-center justify-content-center border-round-xl shadow-2 w-3rem h-3rem ${color !== 'secondary' ? 'text-white' : 'text-primary'}`} 
                style={{ backgroundColor: color === 'secondary' ? 'var(--surface-card)' : `var(--${color === 'primary' ? 'primary' : color}-500)` }}>
             {icon}
           </div>

@@ -55,14 +55,14 @@ const PrimeStatCard: React.FC<StatCardProps> = ({
   };
 
   const cardContent = (
-    <div className="p-3">
-      <div className="flex justify-content-between align-items-center mb-3">
+    <div className="p-4">
+      <div className="flex justify-content-between align-items-center mb-4">
         <div>
-          <div className="text-500 font-medium mb-1">{title}</div>
+          <div className="text-600 font-medium mb-1 text-sm">{title}</div>
           <div className="text-900 font-bold text-2xl">{value}</div>
         </div>
         {icon && (
-          <div className={`flex align-items-center justify-content-center border-round-xl shadow-1 w-3rem h-3rem ${color !== 'secondary' ? 'text-white' : 'text-primary'}`} 
+          <div className={`flex align-items-center justify-content-center border-round-2xl shadow-2 w-3rem h-3rem ${color !== 'secondary' ? 'text-white' : 'text-primary'}`} 
                style={{ backgroundColor: color === 'secondary' ? 'var(--surface-card)' : `var(--${color === 'primary' ? 'primary' : color}-500)` }}>
             {icon}
           </div>
@@ -71,34 +71,35 @@ const PrimeStatCard: React.FC<StatCardProps> = ({
       
       {trend !== undefined && (
         <div className="flex align-items-center">
-          <Tag severity={getTrendColor()} icon={getTrendIcon()} className="px-2 py-1">
+          <Tag severity={getTrendColor()} icon={getTrendIcon()} className="px-2 py-1 border-round-lg">
             {formatTrend()}
           </Tag>
-          {trendLabel && <span className="text-xs text-500 ml-2">{trendLabel}</span>}
+          {trendLabel && <span className="text-xs text-600 ml-2">{trendLabel}</span>}
         </div>
       )}
       
       {progress !== undefined && (
-        <div className="mt-3">
+        <div className="mt-4">
           <ProgressBar value={progress} showValue={false} 
                       style={{ 
                         height: '0.5rem', 
-                        borderRadius: '0.25rem',
+                        borderRadius: '0.5rem',
                         background: 'var(--surface-200)'
                       }} 
-                      className="mb-1"
+                      className="mb-2"
                       pt={{
                         value: { 
                           style: { 
                             background: `var(--${color === 'primary' ? 'primary' : color}-500)`, 
-                            borderRadius: '0.25rem' 
+                            borderRadius: '0.5rem',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                           }
                         }
                       }}
           />
           <div className="flex justify-content-between">
-            <span className="text-xs text-500">Progress</span>
-            <span className="text-xs text-700 font-medium">{progress}%</span>
+            <span className="text-xs text-600">Progress</span>
+            <span className="text-xs text-800 font-medium">{progress}%</span>
           </div>
         </div>
       )}
@@ -106,7 +107,7 @@ const PrimeStatCard: React.FC<StatCardProps> = ({
   );
 
   return (
-    <Card className={`h-full ${className} shadow-2 border-round-xl`}>
+    <Card className={`h-full ${className} shadow-3 border-round-2xl overflow-hidden`}>
       {cardContent}
     </Card>
   );

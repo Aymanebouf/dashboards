@@ -39,7 +39,7 @@ const PrimeStatCard: React.FC<StatCardProps> = ({
   };
 
   const getTrendColor = () => {
-    if (!trend) return '';
+    if (!trend) return 'secondary';
     return trend > 0 ? 'success' : 'danger';
   };
 

@@ -10,13 +10,14 @@ import DraggableWidget from './DraggableWidget';
 import WidgetPicker from './WidgetPicker';
 import EditWidgetDialog from './EditWidgetDialog';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { WidgetConfig, DashboardConfig, getDashboard, saveDashboard, getAvailableWidgetData } from '@/services/dashboardService';
+import { WidgetConfig, DashboardConfig, getDashboard, saveDashboard, getAvailableWidgetData, deleteDashboard } from '@/services/dashboardService';
 
 interface CustomDashboardProps {
   dashboardId: string;
+  onDeleteDashboard?: (id: string) => void;
 }
 
-const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId }) => {
+const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId, onDeleteDashboard }) => {
   const [dashboard, setDashboard] = useState<DashboardConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -108,6 +109,7 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId }) => {
     
     setDashboard(updatedDashboard);
     saveDashboard(updatedDashboard);
+    toast.success('Widget ajouté');
   };
 
   const handleRemoveWidget = (widgetId: string) => {
@@ -170,6 +172,17 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId }) => {
     }
   };
 
+  const handleDeleteCurrentDashboard = () => {
+    if (!dashboard) return;
+    
+    deleteDashboard(dashboard.id);
+    toast.success('Tableau de bord supprimé');
+    
+    if (onDeleteDashboard) {
+      onDeleteDashboard(dashboard.id);
+    }
+  };
+
   if (!dashboard) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -189,7 +202,7 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId }) => {
             placeholder="Nom du tableau de bord"
           />
         ) : (
-          <h2 className="text-xl font-semibold">{dashboard.name}</h2>
+          <div className="text-xl font-semibold">{dashboard.name}</div>
         )}
         
         <div className="flex space-x-2">
@@ -240,7 +253,7 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId }) => {
           </Button>
           
           {isEditing && (
-            <Button variant="destructive" size="sm">
+            <Button variant="destructive" size="sm" onClick={handleDeleteCurrentDashboard}>
               <Trash className="mr-2 h-4 w-4" />
               Supprimer
             </Button>

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ChartWidget from './widgets/ChartWidget';
@@ -9,6 +9,7 @@ import AIAnalysisSection from './AIAnalysisSection';
 import CustomDashboard from './custom/CustomDashboard';
 import DashboardSelector from './custom/DashboardSelector';
 import useCustomDashboards from '@/hooks/useCustomDashboards';
+import { getDashboards } from '@/services/dashboardService';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -29,8 +30,27 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     dashboards, 
     selectedDashboardId, 
     setSelectedDashboardId,
-    isLoading
+    isLoading,
+    refreshDashboards
   } = useCustomDashboards();
+
+  // Rafraîchir les dashboards lorsqu'on accède à l'onglet personnalisé
+  useEffect(() => {
+    if (activeTab === 'personnalise') {
+      refreshDashboards();
+    }
+  }, [activeTab, refreshDashboards]);
+
+  const handleDeleteDashboard = (id: string) => {
+    refreshDashboards();
+    if (dashboards.length > 0) {
+      // Sélectionner le premier tableau de bord disponible
+      const availableDashboards = getDashboards();
+      if (availableDashboards.length > 0) {
+        setSelectedDashboardId(availableDashboards[0].id);
+      }
+    }
+  };
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -76,7 +96,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
       <TabsContent value="personnalise" className="space-y-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Tableau de bord personnalisé</h2>
+          <h2 className="text-xl font-semibold">Tableaux de bord personnalisés</h2>
           {!isLoading && dashboards.length > 0 && (
             <DashboardSelector
               dashboards={dashboards}
@@ -92,7 +112,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           </div>
         ) : (
           selectedDashboardId ? (
-            <CustomDashboard dashboardId={selectedDashboardId} />
+            <CustomDashboard 
+              dashboardId={selectedDashboardId} 
+              onDeleteDashboard={handleDeleteDashboard}
+            />
           ) : (
             <Card>
               <CardContent className="py-8 text-center">

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Plus } from 'lucide-react';
 import { getAvailableWidgetData } from '@/services/dashboardService';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface WidgetPickerProps {
   onAddWidget: (widgetType: 'kpi' | 'chart', sourceId: string) => void;
@@ -38,20 +39,23 @@ const WidgetPicker: React.FC<WidgetPickerProps> = ({ onAddWidget }) => {
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'kpi' | 'chart')} className="mt-4">
-          <TabsList className="w-full">
-            <TabsTrigger value="kpi" className="flex-1">Indicateurs clés</TabsTrigger>
-            <TabsTrigger value="chart" className="flex-1">Graphiques</TabsTrigger>
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="kpi">Indicateurs clés</TabsTrigger>
+            <TabsTrigger value="chart">Graphiques</TabsTrigger>
           </TabsList>
           
           <TabsContent value="kpi" className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {availableData.kpi.map((kpi) => (
-                <Card key={kpi.id} className="cursor-pointer hover:bg-accent transition-colors" onClick={() => handleAddWidget('kpi', kpi.id)}>
+                <Card key={kpi.id} className="cursor-pointer hover:bg-accent/20 transition-colors" onClick={() => handleAddWidget('kpi', kpi.id)}>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
+                    <CardTitle className="text-sm font-medium flex justify-between">
+                      {kpi.title}
+                      <Badge variant="outline" className="ml-2">{kpi.trend}</Badge>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xl font-bold">{kpi.value}</div>
+                    <div className="text-2xl font-bold">{kpi.value}</div>
                     <p className="text-xs text-muted-foreground mt-1">{kpi.description}</p>
                   </CardContent>
                 </Card>
@@ -62,15 +66,18 @@ const WidgetPicker: React.FC<WidgetPickerProps> = ({ onAddWidget }) => {
           <TabsContent value="chart" className="mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {availableData.charts.map((chart) => (
-                <Card key={chart.id} className="cursor-pointer hover:bg-accent transition-colors" onClick={() => handleAddWidget('chart', chart.id)}>
+                <Card key={chart.id} className="cursor-pointer hover:bg-accent/20 transition-colors" onClick={() => handleAddWidget('chart', chart.id)}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium">{chart.title}</CardTitle>
                     <CardDescription className="text-xs">Type: {chart.type}</CardDescription>
                   </CardHeader>
                   <CardContent className="h-28 overflow-hidden">
                     {/* Aperçu du graphique ici */}
-                    <div className="w-full h-full bg-muted rounded-md flex items-center justify-center text-muted-foreground">
-                      Aperçu graphique
+                    <div className="w-full h-full bg-accent/10 rounded-md flex items-center justify-center text-muted-foreground">
+                      {chart.type === 'pie' ? 'Graphique en secteurs' : 
+                       chart.type === 'bar' ? 'Graphique en barres' : 
+                       chart.type === 'line' ? 'Graphique en lignes' : 
+                       'Aperçu graphique'}
                     </div>
                   </CardContent>
                 </Card>

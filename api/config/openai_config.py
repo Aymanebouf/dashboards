@@ -41,20 +41,20 @@ def setup_openai():
         # Vérifier que la clé API est bien chargée
         openai_api_key = os.environ.get('OPENAI_API_KEY')
         print(f"Tentative de chargement de la clé API: {'Clé trouvée' if openai_api_key else 'Clé non trouvée'}")
-        print(f"Variables d'environnement disponibles: {list(os.environ.keys())}")
-
+        
         # Configuration de OpenAI si disponible, sinon mode simulation
         if openai_api_key:
-            import openai
-            openai.api_key = openai_api_key
-            print("Clé API OpenAI configurée avec succès!")
-            return True
+            try:
+                import openai
+                openai.api_key = openai_api_key
+                print("Clé API OpenAI configurée avec succès!")
+                return True
+            except ImportError:
+                print("Module OpenAI non installé. Veuillez l'installer avec 'pip install openai'")
+                return False
         else:
             print("AVERTISSEMENT: Clé API OpenAI non configurée. Mode de simulation activé.")
             return False
-    except ImportError:
-        print("Module OpenAI non installé. Mode de simulation activé.")
-        return False
     except Exception as e:
         print(f"Erreur lors de la configuration d'OpenAI: {str(e)}")
         return False

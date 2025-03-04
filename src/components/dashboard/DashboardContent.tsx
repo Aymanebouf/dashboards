@@ -6,6 +6,9 @@ import ChartWidget from './widgets/ChartWidget';
 import KPICardGrid from './widgets/KPICardGrid';
 import ChartGrid from './widgets/ChartGrid';
 import AIAnalysisSection from './AIAnalysisSection';
+import CustomDashboard from './custom/CustomDashboard';
+import DashboardSelector from './custom/DashboardSelector';
+import useCustomDashboards from '@/hooks/useCustomDashboards';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -22,6 +25,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   isAIConfigured,
   errorMessage
 }) => {
+  const { 
+    dashboards, 
+    selectedDashboardId, 
+    setSelectedDashboardId,
+    isLoading
+  } = useCustomDashboards();
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
       <TabsList className="bg-muted/60">
@@ -65,28 +75,32 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       </TabsContent>
 
       <TabsContent value="personnalise" className="space-y-4">
-        <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
-          <CardHeader>
-            <CardTitle>Performance des sites</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartWidget
-              title=""
-              data={[
-                { name: 'Site A', value: 4000 },
-                { name: 'Site B', value: 3000 },
-                { name: 'Site C', value: 2000 },
-                { name: 'Site D', value: 2780 },
-                { name: 'Site E', value: 1890 },
-                { name: 'Site F', value: 2390 },
-                { name: 'Site G', value: 3490 },
-              ]}
-              type="bar"
-              colors={['#8884d8']}
-              height={400}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Tableau de bord personnalisé</h2>
+          {!isLoading && dashboards.length > 0 && (
+            <DashboardSelector
+              dashboards={dashboards}
+              selectedId={selectedDashboardId}
+              onSelect={setSelectedDashboardId}
             />
-          </CardContent>
-        </Card>
+          )}
+        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <p>Chargement des tableaux de bord...</p>
+          </div>
+        ) : (
+          selectedDashboardId ? (
+            <CustomDashboard dashboardId={selectedDashboardId} />
+          ) : (
+            <Card>
+              <CardContent className="py-8 text-center">
+                <p>Aucun tableau de bord personnalisé disponible.</p>
+              </CardContent>
+            </Card>
+          )
+        )}
       </TabsContent>
 
       <TabsContent value="ia-predictions" className="space-y-4">

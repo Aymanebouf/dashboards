@@ -1,0 +1,65 @@
+
+/* Styles pour les widgets draggables */
+.draggable-widget {
+  cursor: move;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.draggable-widget:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.draggable-widget.dragging {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+/* Styles pour react-grid-layout */
+.react-grid-item {
+  transition: all 200ms ease;
+  transition-property: left, top, right;
+}
+
+.react-grid-item.react-grid-placeholder {
+  background: #f0f9ff;
+  border: 2px dashed #90cdf4;
+  border-radius: 0.5rem;
+  z-index: 2;
+  transition-duration: 100ms;
+  opacity: 0.7;
+}
+
+.react-grid-item.resizing {
+  z-index: 1;
+  will-change: width, height;
+}
+
+.react-grid-item.react-draggable-dragging {
+  transition: none;
+  z-index: 3;
+  will-change: transform;
+  cursor: move;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.react-grid-item > .react-resizable-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  bottom: 0;
+  right: 0;
+  background-position: bottom right;
+  padding: 0 3px 3px 0;
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  box-sizing: border-box;
+  cursor: se-resize;
+  filter: invert(50%);
+}
+
+.react-grid-item > .react-resizable-handle.react-resizable-handle-se {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='10' height='10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h10v10H0z' fill='%23000' fill-rule='evenodd'/%3E%3C/svg%3E");
+  padding-right: 10px;
+  padding-bottom: 10px;
+}

@@ -206,34 +206,6 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId, onDelete
         )}
         
         <div className="flex space-x-2">
-          <Dialog open={isNewDashboardDialogOpen} onOpenChange={setIsNewDashboardDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="mr-2 h-4 w-4" />
-                Nouveau
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Créer un nouveau tableau de bord</DialogTitle>
-                <DialogDescription>
-                  Entrez un nom pour votre nouveau tableau de bord.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Input
-                  value={newDashboardName}
-                  onChange={(e) => setNewDashboardName(e.target.value)}
-                  placeholder="Nom du tableau de bord"
-                />
-              </div>
-              <DialogFooter>
-                <Button onClick={() => setIsNewDashboardDialogOpen(false)} variant="outline">Annuler</Button>
-                <Button onClick={handleCreateNewDashboard}>Créer</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          
           <Button
             variant={isEditing ? "default" : "outline"}
             size="sm"

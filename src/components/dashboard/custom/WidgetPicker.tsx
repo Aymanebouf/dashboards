@@ -24,6 +24,12 @@ const WidgetPicker: React.FC<WidgetPickerProps> = ({ onAddWidget }) => {
     setOpen(false);
     toast.success(`Widget ajouté au tableau de bord`);
   };
+
+  const getTrendVariant = (trend: string) => {
+    if (trend.startsWith('+')) return 'success';
+    if (trend.startsWith('-')) return 'destructive';
+    return 'outline';
+  };
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -51,7 +57,7 @@ const WidgetPicker: React.FC<WidgetPickerProps> = ({ onAddWidget }) => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-medium flex justify-between">
                       {kpi.title}
-                      <Badge variant="outline" className="ml-2">{kpi.trend}</Badge>
+                      <Badge variant={getTrendVariant(kpi.trend)} className="ml-2">{kpi.trend}</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>

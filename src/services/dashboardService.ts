@@ -4,8 +4,8 @@ interface WidgetConfig {
   type: 'kpi' | 'chart';
   title: string;
   sourceData: string;
-  size: [number, number]; // [width, height]
-  position: [number, number]; // [x, y]
+  size: [number, number]; // [width, height] as tuple
+  position: [number, number]; // [x, y] as tuple
   config?: any; // Configurations spécifiques au widget
 }
 
@@ -82,7 +82,17 @@ export const getDashboards = (): DashboardConfig[] => {
       // Convertir les dates de string à Date
       return dashboards.map(dashboard => ({
         ...dashboard,
-        lastModified: new Date(dashboard.lastModified)
+        lastModified: new Date(dashboard.lastModified),
+        // Assurer que les tableaux size et position sont bien des tuples [number, number]
+        widgets: dashboard.widgets.map(widget => ({
+          ...widget,
+          size: Array.isArray(widget.size) && widget.size.length === 2 
+            ? widget.size as [number, number] 
+            : [1, 1] as [number, number],
+          position: Array.isArray(widget.position) && widget.position.length === 2 
+            ? widget.position as [number, number] 
+            : [0, 0] as [number, number]
+        }))
       }));
     }
     // S'il n'y a pas de tableaux personnalisés, créer le défaut
@@ -110,7 +120,17 @@ export const saveDashboard = (dashboard: DashboardConfig): void => {
     // Mettre à jour la date de dernière modification
     const updatedDashboard = {
       ...dashboard,
-      lastModified: new Date()
+      lastModified: new Date(),
+      // Assurer que les tableaux size et position sont bien des tuples [number, number]
+      widgets: dashboard.widgets.map(widget => ({
+        ...widget,
+        size: Array.isArray(widget.size) && widget.size.length === 2 
+          ? widget.size as [number, number] 
+          : [1, 1] as [number, number],
+        position: Array.isArray(widget.position) && widget.position.length === 2 
+          ? widget.position as [number, number] 
+          : [0, 0] as [number, number]
+      }))
     };
     
     if (existingIndex >= 0) {

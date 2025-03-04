@@ -64,8 +64,8 @@ const GridDashboard: React.FC<GridDashboardProps> = ({ dashboardId }) => {
       if (layoutItem) {
         return {
           ...widget,
-          position: [layoutItem.x, layoutItem.y],
-          size: [layoutItem.w, layoutItem.h]
+          position: [layoutItem.x, layoutItem.y] as [number, number],
+          size: [layoutItem.w, layoutItem.h] as [number, number]
         };
       }
       return widget;

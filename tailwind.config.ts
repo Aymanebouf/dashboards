@@ -64,14 +64,14 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				logitag: {
-					primary: '#7056AB',
-					secondary: '#F97CE5',
-					blue: '#1E88E5',
-					red: '#E91E63',
-					green: '#66BB6A',
-					yellow: '#FFC107',
-					dark: '#333333',
-					light: '#F5F5F7'
+					primary: '#6366f1',
+					secondary: '#f471b5',
+					blue: '#3b82f6',
+					red: '#ef4444',
+					green: '#10b981',
+					yellow: '#f59e0b',
+					dark: '#0f172a',
+					light: '#f8fafc'
 				}
 			},
 			borderRadius: {

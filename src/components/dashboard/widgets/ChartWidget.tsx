@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -96,7 +97,7 @@ const ChartWidget: React.FC<Props> = ({
   title,
   data,
   type = 'bar',
-  colors = ['#1E88E5', '#E91E63', '#66BB6A'],
+  colors = ['#6366F1', '#EC4899', '#10B981', '#F59E0B', '#3B82F6'],
   height = 300,
   className = '',
   showControls = true
@@ -236,8 +237,8 @@ const ChartWidget: React.FC<Props> = ({
   };
 
   return (
-    <Card className={`h-full overflow-hidden dashboard-widget ${className}`} ref={chartRef}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className={`h-full overflow-hidden dashboard-widget ${className} bg-gradient-to-br from-white/80 to-white/40 dark:from-slate-900/90 dark:to-slate-800/70 backdrop-blur-sm border-2 border-slate-200/50 dark:border-slate-700/50 shadow-xl rounded-xl transition-all duration-300 hover:shadow-lg`} ref={chartRef}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 bg-gradient-to-r from-indigo-50/40 to-violet-50/40 dark:from-indigo-950/20 dark:to-violet-950/20">
         {isEditing ? (
           <input
             type="text"
@@ -245,39 +246,39 @@ const ChartWidget: React.FC<Props> = ({
             onChange={(e) => setEditedTitle(e.target.value)}
             onBlur={handleSaveEdit}
             onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
-            className="text-lg font-medium border-b border-border focus:outline-none"
+            className="text-lg font-semibold border-b-2 border-indigo-300 dark:border-indigo-700 bg-transparent focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 w-full px-1 py-1 rounded"
             autoFocus
           />
         ) : (
-          <CardTitle className="text-lg font-medium">{editedTitle || title}</CardTitle>
+          <CardTitle className="text-lg font-semibold text-slate-800 dark:text-white/90">{editedTitle || title}</CardTitle>
         )}
         {showControls && (
           <div className="flex items-center space-x-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8">
+                <Button variant="outline" size="icon" className="h-8 w-8 border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                   <ChevronDown size={15} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setChartType('bar')}>
-                  <BarChart2 className="mr-2 h-4 w-4" />
+              <DropdownMenuContent align="end" className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-lg rounded-lg p-1.5">
+                <DropdownMenuItem onClick={() => setChartType('bar')} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <BarChart2 className="mr-2 h-4 w-4 text-emerald-500" />
                   <span>Bar Chart</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setChartType('line')}>
-                  <LineChartIcon className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => setChartType('line')} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <LineChartIcon className="mr-2 h-4 w-4 text-violet-500" />
                   <span>Line Chart</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setChartType('area')}>
-                  <LineChartIcon className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => setChartType('area')} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <LineChartIcon className="mr-2 h-4 w-4 text-blue-500" />
                   <span>Area Chart</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setChartType('pie')}>
-                  <PieChartIcon className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => setChartType('pie')} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <PieChartIcon className="mr-2 h-4 w-4 text-amber-500" />
                   <span>Pie Chart</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setChartType('composed')}>
-                  <BarChart2 className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => setChartType('composed')} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <BarChart2 className="mr-2 h-4 w-4 text-rose-500" />
                   <span>Composed Chart</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -285,17 +286,17 @@ const ChartWidget: React.FC<Props> = ({
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon" className="h-8 w-8">
+                <Button variant="outline" size="icon" className="h-8 w-8 border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                   <Download size={15} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => downloadCSV(data, editedTitle || title)}>
-                  <Download className="mr-2 h-4 w-4" />
+              <DropdownMenuContent align="end" className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200 dark:border-slate-800 shadow-lg rounded-lg p-1.5">
+                <DropdownMenuItem onClick={() => downloadCSV(data, editedTitle || title)} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <Download className="mr-2 h-4 w-4 text-blue-500" />
                   <span>CSV</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => downloadPDF(chartRef, editedTitle || title)}>
-                  <FileText className="mr-2 h-4 w-4" />
+                <DropdownMenuItem onClick={() => downloadPDF(chartRef, editedTitle || title)} className="flex items-center cursor-pointer rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors py-1.5">
+                  <FileText className="mr-2 h-4 w-4 text-rose-500" />
                   <span>PDF</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -304,23 +305,23 @@ const ChartWidget: React.FC<Props> = ({
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-8 w-8"
+              className="h-8 w-8 border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
               onClick={() => setIsEditing(true)}
             >
-              <Edit3 size={15} />
+              <Edit3 size={15} className="text-violet-500" />
             </Button>
             
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+              className="h-8 w-8 border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-600 rounded-lg"
             >
-              <Trash2 size={15} />
+              <Trash2 size={15} className="text-slate-400 hover:text-red-500 transition-colors" />
             </Button>
           </div>
         )}
       </CardHeader>
-      <CardContent className="pt-2">
+      <CardContent className="pt-3 pb-2 px-3">
         {renderChart()}
       </CardContent>
     </Card>

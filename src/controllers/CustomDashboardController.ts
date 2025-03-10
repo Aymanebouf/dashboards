@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { WidgetConfig, DashboardConfig } from '@/models/dashboard';
-import { fetchDashboard, saveDashboard, deleteDashboard } from '@/services/dashboardService';
+import { getDashboard, saveDashboard, deleteDashboard } from '@/services/dashboardService';
 
 /**
  * Custom hook for managing dashboard state and operations
@@ -21,17 +21,28 @@ export const useCustomDashboardController = (
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const dashboardData = await fetchDashboard(dashboardId);
-        // Ensure the type is compatible by enforcing required fields
-        const typedDashboard: DashboardConfig = {
-          ...dashboardData,
-          widgets: dashboardData.widgets.map(widget => ({
-            ...widget,
-            config: widget.config || {} // Ensure config is always defined
-          }))
-        };
-        setDashboard(typedDashboard);
-        setNewTitle(typedDashboard.name);
+        const dashboardData = await getDashboard(dashboardId);
+        if (dashboardData) {
+          // Ensure the type is compatible by enforcing required fields
+          const typedDashboard: DashboardConfig = {
+            ...dashboardData,
+            id: dashboardData.id,
+            name: dashboardData.name,
+            lastModified: new Date(dashboardData.lastModified),
+            widgets: dashboardData.widgets.map(widget => ({
+              ...widget,
+              id: widget.id,
+              type: widget.type,
+              title: widget.title,
+              sourceData: widget.sourceData,
+              size: widget.size,
+              position: widget.position,
+              config: widget.config || {} // Ensure config is always defined
+            }))
+          };
+          setDashboard(typedDashboard);
+          setNewTitle(typedDashboard.name);
+        }
       } catch (error) {
         console.error('Error loading dashboard:', error);
         toast.error('Erreur lors du chargement du tableau de bord');

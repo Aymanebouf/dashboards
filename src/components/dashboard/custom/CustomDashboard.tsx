@@ -1,186 +1,53 @@
 
-import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+import React, { useState } from 'react';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { Edit, Save, Plus, Trash } from 'lucide-react';
+import { Edit, Save, Trash } from 'lucide-react';
 import DraggableWidget from './DraggableWidget';
 import WidgetPicker from './WidgetPicker';
 import EditWidgetDialog from './EditWidgetDialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { WidgetConfig, DashboardConfig, getDashboard, saveDashboard, getAvailableWidgetData, deleteDashboard } from '@/services/dashboardService';
+import { useCustomDashboardController } from '@/controllers/CustomDashboardController';
 
 interface CustomDashboardProps {
   dashboardId: string;
   onDeleteDashboard?: (id: string) => void;
 }
 
+/**
+ * CustomDashboard component for handling editable dashboards
+ */
 const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId, onDeleteDashboard }) => {
-  const [dashboard, setDashboard] = useState<DashboardConfig | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [editingWidget, setEditingWidget] = useState<WidgetConfig | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isNewDashboardDialogOpen, setIsNewDashboardDialogOpen] = useState(false);
   const [newDashboardName, setNewDashboardName] = useState('');
 
-  useEffect(() => {
-    const loadedDashboard = getDashboard(dashboardId);
-    if (loadedDashboard) {
-      setDashboard(loadedDashboard);
-      setNewTitle(loadedDashboard.name);
-    }
-  }, [dashboardId]);
+  // Using our controller for dashboard logic
+  const {
+    dashboard,
+    isEditing,
+    newTitle,
+    editingWidget,
+    isDialogOpen,
+    setNewTitle,
+    setIsDialogOpen,
+    handleDragEnd,
+    handleToggleEdit,
+    handleAddWidget,
+    handleRemoveWidget,
+    handleEditWidget,
+    handleSaveWidget,
+    handleDeleteCurrentDashboard,
+    handleCreateNewDashboard
+  } = useCustomDashboardController(dashboardId, onDeleteDashboard);
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!dashboard || !result.destination) return;
+  // Handle creating a new dashboard
+  const createNewDashboard = () => {
+    if (!newDashboardName.trim()) return;
     
-    const items = Array.from(dashboard.widgets);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    
-    const newDashboard = {
-      ...dashboard,
-      widgets: items
-    };
-    
-    setDashboard(newDashboard);
-    saveDashboard(newDashboard);
-  };
-
-  const handleToggleEdit = () => {
-    if (isEditing) {
-      // Save changes
-      if (dashboard) {
-        const updatedDashboard = {
-          ...dashboard,
-          name: newTitle
-        };
-        saveDashboard(updatedDashboard);
-        toast.success('Tableau de bord mis à jour');
-      }
-    }
-    setIsEditing(!isEditing);
-  };
-
-  const handleAddWidget = (widgetType: 'kpi' | 'chart', sourceId: string) => {
-    if (!dashboard) return;
-    
-    const availableData = getAvailableWidgetData();
-    let widgetData;
-    let widgetConfig;
-    
-    if (widgetType === 'kpi') {
-      widgetData = availableData.kpi.find(kpi => kpi.id === sourceId);
-      if (!widgetData) return;
-      
-      widgetConfig = {
-        value: widgetData.value,
-        trend: widgetData.trend,
-        description: widgetData.description
-      };
-    } else {
-      widgetData = availableData.charts.find(chart => chart.id === sourceId);
-      if (!widgetData) return;
-      
-      widgetConfig = {
-        type: widgetData.type,
-        data: widgetData.data,
-        colors: widgetData.colors
-      };
-    }
-    
-    const newWidget: WidgetConfig = {
-      id: `widget-${Date.now()}`,
-      type: widgetType,
-      title: widgetData.title,
-      sourceData: sourceId,
-      size: widgetType === 'kpi' ? [1, 1] : [2, 2],
-      position: [0, dashboard.widgets.length], // Add at the end
-      config: widgetConfig
-    };
-    
-    const updatedDashboard = {
-      ...dashboard,
-      widgets: [...dashboard.widgets, newWidget]
-    };
-    
-    setDashboard(updatedDashboard);
-    saveDashboard(updatedDashboard);
-    toast.success('Widget ajouté');
-  };
-
-  const handleRemoveWidget = (widgetId: string) => {
-    if (!dashboard) return;
-    
-    const updatedDashboard = {
-      ...dashboard,
-      widgets: dashboard.widgets.filter(widget => widget.id !== widgetId)
-    };
-    
-    setDashboard(updatedDashboard);
-    saveDashboard(updatedDashboard);
-    toast.success('Widget supprimé');
-  };
-
-  const handleEditWidget = (widget: WidgetConfig) => {
-    setEditingWidget(widget);
-    setIsDialogOpen(true);
-  };
-
-  const handleSaveWidget = (updatedWidget: WidgetConfig) => {
-    if (!dashboard) return;
-    
-    const updatedDashboard = {
-      ...dashboard,
-      widgets: dashboard.widgets.map(widget => 
-        widget.id === updatedWidget.id ? updatedWidget : widget
-      )
-    };
-    
-    setDashboard(updatedDashboard);
-    saveDashboard(updatedDashboard);
-    toast.success('Widget mis à jour');
-  };
-
-  const handleCreateNewDashboard = () => {
-    if (!newDashboardName.trim()) {
-      toast.error('Veuillez saisir un nom pour le tableau de bord');
-      return;
-    }
-    
-    const newId = `dashboard-${Date.now()}`;
-    const newDashboard: DashboardConfig = {
-      id: newId,
-      name: newDashboardName,
-      lastModified: new Date(),
-      widgets: []
-    };
-    
-    saveDashboard(newDashboard);
+    handleCreateNewDashboard(newDashboardName);
     setIsNewDashboardDialogOpen(false);
     setNewDashboardName('');
-    toast.success('Nouveau tableau de bord créé');
-    
-    // Recharger le dashboard actuel avec le nouveau
-    const loadedDashboard = getDashboard(newId);
-    if (loadedDashboard) {
-      setDashboard(loadedDashboard);
-      setNewTitle(loadedDashboard.name);
-    }
-  };
-
-  const handleDeleteCurrentDashboard = () => {
-    if (!dashboard) return;
-    
-    deleteDashboard(dashboard.id);
-    toast.success('Tableau de bord supprimé');
-    
-    if (onDeleteDashboard) {
-      onDeleteDashboard(dashboard.id);
-    }
   };
 
   if (!dashboard) {

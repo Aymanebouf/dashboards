@@ -9,6 +9,9 @@ interface DashboardLayoutProps {
   title?: string;
 }
 
+/**
+ * Main dashboard layout component providing consistent structure for dashboard pages
+ */
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ 
   children,
   title = 'Dashboard'
@@ -33,7 +36,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         "pt-16 min-h-screen transition-all duration-300",
         sidebarExpanded ? "ml-64" : "ml-16"
       )}>
-        <div className="p-6">
+        <div className="p-6 fade-in">
           <div className="animate-fade-in">
             {children}
           </div>

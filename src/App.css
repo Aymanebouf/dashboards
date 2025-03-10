@@ -1,4 +1,5 @@
 
+/* Base styles */
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -6,6 +7,7 @@
   text-align: center;
 }
 
+/* Logo and animation styles */
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -34,6 +36,7 @@
   }
 }
 
+/* Card components */
 .card {
   padding: 2em;
   border-radius: 1rem;
@@ -53,7 +56,7 @@
   font-size: 0.9em;
 }
 
-/* Professional styles */
+/* Gradient text effects */
 .gradient-heading {
   background-image: linear-gradient(90deg, var(--logitag-primary), var(--logitag-secondary));
   background-clip: text;
@@ -62,6 +65,7 @@
   font-weight: 700;
 }
 
+/* Button styles */
 .glass-button {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
@@ -76,7 +80,7 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Dashboard card styles */
+/* Dashboard stat card styles */
 .stat-card {
   border-radius: 1rem;
   overflow: hidden;
@@ -98,4 +102,23 @@ html.dark .stat-card {
 
 html.dark .stat-card:hover {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Animation utilities */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease forwards;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

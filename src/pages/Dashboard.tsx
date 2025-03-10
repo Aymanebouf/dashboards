@@ -1,46 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
-import { checkAIConfiguration } from '@/services/aiService';
-import { toast } from 'sonner';
-import useDashboardData from '@/hooks/useDashboardData';
+import { useDashboardController } from '@/controllers/DashboardController';
 
+/**
+ * Main Dashboard page component
+ */
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('principal');
-  const [selectedDashboard, setSelectedDashboard] = useState('duree-presence');
-  const [isAIConfigured, setIsAIConfigured] = useState<boolean | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
-  const { dashboardTitle, kpiData } = useDashboardData(selectedDashboard);
-
-  useEffect(() => {
-    const checkConfiguration = async () => {
-      try {
-        const configured = await checkAIConfiguration();
-        setIsAIConfigured(configured);
-        if (!configured) {
-          console.log('L\'IA n\'est pas configurée. Une clé API OpenAI est nécessaire.');
-          toast.error('Veuillez configurer la clé API OpenAI pour utiliser les fonctionnalités d\'IA');
-          setErrorMessage('La clé API OpenAI n\'est pas configurée. Veuillez vérifier le fichier api/.env');
-        } else {
-          console.log('L\'IA est correctement configurée');
-          setErrorMessage(null);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la vérification de l'API OpenAI:", error);
-        setIsAIConfigured(false);
-        setErrorMessage('Impossible de se connecter à l\'API. Vérifiez que le serveur Flask est en cours d\'exécution.');
-      }
-    };
-    
-    checkConfiguration();
-  }, []);
-
-  const handleDashboardChange = (dashboardId: string) => {
-    setSelectedDashboard(dashboardId);
-  };
+  // Using the controller to handle business logic and state
+  const {
+    activeTab,
+    setActiveTab,
+    selectedDashboard,
+    isAIConfigured,
+    errorMessage,
+    dashboardTitle,
+    kpiData,
+    handleDashboardChange
+  } = useDashboardController();
 
   return (
     <DashboardLayout>

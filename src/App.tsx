@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/use-theme";
 
 // PrimeReact imports
@@ -28,6 +28,8 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/prime" element={<PrimeDashboardExample />} />
           <Route path="/ai-predictions" element={<AIPredictions />} />
+          {/* Redirect /infos-engins to the dashboard page */}
+          <Route path="/infos-engins" element={<Navigate to="/" replace />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

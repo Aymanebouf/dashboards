@@ -1,219 +1,237 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { WidgetConfig, DashboardConfig } from '@/models/dashboard';
-import { 
-  getDashboard, 
-  saveDashboard, 
-  getAvailableWidgetData, 
-  deleteDashboard,
-  getDashboards
-} from '@/services/dashboardService';
+import { fetchDashboard, saveDashboard, deleteDashboard } from '@/services/dashboardService';
 
 /**
- * Controller for custom dashboard functionality
- * Manages dashboard editing, widgets, and state
+ * Custom hook for managing dashboard state and operations
  */
-export const useCustomDashboardController = (dashboardId: string, onDeleteDashboard?: (id: string) => void) => {
+export const useCustomDashboardController = (
+  dashboardId: string,
+  onDeleteDashboard?: (id: string) => void
+) => {
   const [dashboard, setDashboard] = useState<DashboardConfig | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [editingWidget, setEditingWidget] = useState<WidgetConfig | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Load dashboard on initialization or ID change
+  // Fetch dashboard data
   useEffect(() => {
-    const loadedDashboard = getDashboard(dashboardId);
-    if (loadedDashboard) {
-      setDashboard(loadedDashboard);
-      setNewTitle(loadedDashboard.name);
+    const loadDashboard = async () => {
+      try {
+        const dashboardData = await fetchDashboard(dashboardId);
+        // Ensure the type is compatible by enforcing required fields
+        const typedDashboard: DashboardConfig = {
+          ...dashboardData,
+          widgets: dashboardData.widgets.map(widget => ({
+            ...widget,
+            config: widget.config || {} // Ensure config is always defined
+          }))
+        };
+        setDashboard(typedDashboard);
+        setNewTitle(typedDashboard.name);
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        toast.error('Erreur lors du chargement du tableau de bord');
+      }
+    };
+
+    if (dashboardId) {
+      loadDashboard();
     }
   }, [dashboardId]);
 
   /**
-   * Handles drag and drop of widgets
+   * Save the current dashboard state
    */
-  const handleDragEnd = (result: any) => {
-    if (!dashboard || !result.destination) return;
+  const saveDashboardState = useCallback(async () => {
+    if (!dashboard) return;
+
+    try {
+      const updatedDashboard = {
+        ...dashboard,
+        name: newTitle,
+        lastModified: new Date()
+      };
+      
+      await saveDashboard(updatedDashboard);
+      
+      // Update the local state with a properly typed object
+      const typedDashboard: DashboardConfig = {
+        ...updatedDashboard,
+        widgets: updatedDashboard.widgets.map(widget => ({
+          ...widget,
+          config: widget.config || {} // Ensure config is always defined
+        }))
+      };
+      
+      setDashboard(typedDashboard);
+      setIsEditing(false);
+      toast.success('Tableau de bord enregistré');
+    } catch (error) {
+      console.error('Error saving dashboard:', error);
+      toast.error('Erreur lors de l\'enregistrement du tableau de bord');
+    }
+  }, [dashboard, newTitle]);
+
+  /**
+   * Toggle edit mode
+   */
+  const handleToggleEdit = useCallback(() => {
+    if (isEditing) {
+      saveDashboardState();
+    } else {
+      setIsEditing(true);
+    }
+  }, [isEditing, saveDashboardState]);
+
+  /**
+   * Handle drag end event from react-beautiful-dnd
+   */
+  const handleDragEnd = useCallback((result: any) => {
+    if (!result.destination || !dashboard) return;
     
     const items = Array.from(dashboard.widgets);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     
-    const newDashboard = {
+    const updatedDashboard: DashboardConfig = {
       ...dashboard,
-      widgets: items
+      widgets: items,
+      lastModified: new Date()
     };
     
-    setDashboard(newDashboard);
-    saveDashboard(newDashboard);
-  };
+    setDashboard(updatedDashboard);
+  }, [dashboard]);
 
   /**
-   * Toggles edit mode and saves changes
+   * Add a new widget to the dashboard
    */
-  const handleToggleEdit = () => {
-    if (isEditing) {
-      // Save changes
-      if (dashboard) {
-        const updatedDashboard = {
-          ...dashboard,
-          name: newTitle,
-          lastModified: new Date()
-        };
-        saveDashboard(updatedDashboard);
-        toast.success('Tableau de bord mis à jour');
-      }
-    }
-    setIsEditing(!isEditing);
-  };
-
-  /**
-   * Adds a new widget to the dashboard
-   */
-  const handleAddWidget = (widgetType: 'kpi' | 'chart', sourceId: string) => {
+  const handleAddWidget = useCallback((widgetType: string) => {
     if (!dashboard) return;
-    
-    const availableData = getAvailableWidgetData();
-    let widgetData;
-    let widgetConfig;
-    
-    if (widgetType === 'kpi') {
-      widgetData = availableData.kpi.find(kpi => kpi.id === sourceId);
-      if (!widgetData) return;
-      
-      widgetConfig = {
-        value: widgetData.value,
-        trend: widgetData.trend,
-        description: widgetData.description
-      };
-    } else {
-      widgetData = availableData.charts.find(chart => chart.id === sourceId);
-      if (!widgetData) return;
-      
-      widgetConfig = {
-        type: widgetData.type,
-        data: widgetData.data,
-        colors: widgetData.colors
-      };
-    }
     
     const newWidget: WidgetConfig = {
       id: `widget-${Date.now()}`,
-      type: widgetType,
-      title: widgetData.title,
-      sourceData: sourceId,
-      size: widgetType === 'kpi' ? [1, 1] : [2, 2],
-      position: [0, dashboard.widgets.length], // Add at the end
-      config: widgetConfig
+      type: widgetType as 'kpi' | 'chart', 
+      title: widgetType === 'kpi' ? 'Nouvel indicateur' : 'Nouveau graphique',
+      sourceData: '',
+      size: [1, 1],
+      position: [0, dashboard.widgets.length],
+      config: {}  // Ensure config is defined
     };
     
-    const updatedDashboard = {
+    const updatedDashboard: DashboardConfig = {
       ...dashboard,
       widgets: [...dashboard.widgets, newWidget],
       lastModified: new Date()
     };
     
     setDashboard(updatedDashboard);
-    saveDashboard(updatedDashboard);
     toast.success('Widget ajouté');
-  };
+  }, [dashboard]);
 
   /**
-   * Removes a widget from the dashboard
+   * Remove a widget from the dashboard
    */
-  const handleRemoveWidget = (widgetId: string) => {
+  const handleRemoveWidget = useCallback((widgetId: string) => {
     if (!dashboard) return;
     
-    const updatedDashboard = {
+    const updatedDashboard: DashboardConfig = {
       ...dashboard,
-      widgets: dashboard.widgets.filter(widget => widget.id !== widgetId),
+      widgets: dashboard.widgets.filter(w => w.id !== widgetId),
       lastModified: new Date()
     };
     
     setDashboard(updatedDashboard);
-    saveDashboard(updatedDashboard);
     toast.success('Widget supprimé');
-  };
+  }, [dashboard]);
 
   /**
-   * Opens widget edit dialog
+   * Open the edit dialog for a widget
    */
-  const handleEditWidget = (widget: WidgetConfig) => {
+  const handleEditWidget = useCallback((widget: WidgetConfig) => {
     setEditingWidget(widget);
     setIsDialogOpen(true);
-  };
+  }, []);
 
   /**
-   * Saves widget updates
+   * Save changes to a widget
    */
-  const handleSaveWidget = (updatedWidget: WidgetConfig) => {
+  const handleSaveWidget = useCallback((updatedWidget: WidgetConfig) => {
     if (!dashboard) return;
     
-    const updatedDashboard = {
+    const updatedDashboard: DashboardConfig = {
       ...dashboard,
-      widgets: dashboard.widgets.map(widget => 
-        widget.id === updatedWidget.id ? updatedWidget : widget
+      widgets: dashboard.widgets.map(w => 
+        w.id === updatedWidget.id ? updatedWidget : w
       ),
       lastModified: new Date()
     };
     
     setDashboard(updatedDashboard);
-    saveDashboard(updatedDashboard);
+    setIsDialogOpen(false);
+    setEditingWidget(null);
     toast.success('Widget mis à jour');
-  };
+  }, [dashboard]);
 
   /**
-   * Deletes the current dashboard
+   * Delete the current dashboard
    */
-  const handleDeleteCurrentDashboard = () => {
+  const handleDeleteCurrentDashboard = useCallback(async () => {
     if (!dashboard) return;
     
-    deleteDashboard(dashboard.id);
-    toast.success('Tableau de bord supprimé');
-    
-    if (onDeleteDashboard) {
-      onDeleteDashboard(dashboard.id);
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce tableau de bord ?')) {
+      try {
+        await deleteDashboard(dashboard.id);
+        toast.success('Tableau de bord supprimé');
+        if (onDeleteDashboard) {
+          onDeleteDashboard(dashboard.id);
+        }
+      } catch (error) {
+        console.error('Error deleting dashboard:', error);
+        toast.error('Erreur lors de la suppression du tableau de bord');
+      }
     }
-  };
+  }, [dashboard, onDeleteDashboard]);
 
   /**
-   * Creates a new dashboard with the given name
+   * Create a new dashboard
    */
-  const handleCreateNewDashboard = (name: string) => {
-    if (!name.trim()) {
-      toast.error('Veuillez saisir un nom pour le tableau de bord');
-      return;
-    }
-    
-    const newId = `dashboard-${Date.now()}`;
+  const handleCreateNewDashboard = useCallback(async (name: string) => {
     const newDashboard: DashboardConfig = {
-      id: newId,
-      name: name,
+      id: `dashboard-${Date.now()}`,
+      name,
       lastModified: new Date(),
       widgets: []
     };
     
-    saveDashboard(newDashboard);
-    toast.success('Nouveau tableau de bord créé');
-    
-    // Reload the dashboard with the new one
-    const loadedDashboard = getDashboard(newId);
-    if (loadedDashboard) {
-      setDashboard(loadedDashboard);
-      setNewTitle(loadedDashboard.name);
+    try {
+      await saveDashboard(newDashboard);
+      
+      // Update the local state with a properly typed object
+      const typedDashboard: DashboardConfig = {
+        ...newDashboard,
+        widgets: [] // Empty widgets array, all correctly typed
+      };
+      
+      setDashboard(typedDashboard);
+      toast.success('Nouveau tableau de bord créé');
+    } catch (error) {
+      console.error('Error creating dashboard:', error);
+      toast.error('Erreur lors de la création du tableau de bord');
     }
-    
-    return newId;
-  };
+  }, []);
 
   return {
     dashboard,
     isEditing,
+    setIsEditing,
     newTitle,
+    setNewTitle,
     editingWidget,
     isDialogOpen,
-    setNewTitle,
     setIsDialogOpen,
     handleDragEnd,
     handleToggleEdit,

@@ -31,6 +31,7 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId, onDelete
     isDialogOpen,
     setNewTitle,
     setIsDialogOpen,
+    setIsEditing,
     handleDragEnd,
     handleToggleEdit,
     handleAddWidget,
@@ -146,7 +147,7 @@ const CustomDashboard: React.FC<CustomDashboardProps> = ({ dashboardId, onDelete
             {isEditing ? (
               <WidgetPicker onAddWidget={handleAddWidget} />
             ) : (
-              <Button onClick={() => setIsEditing(true)}>
+              <Button onClick={handleToggleEdit}>
                 <Edit className="mr-2 h-4 w-4" />
                 Commencer l'édition
               </Button>

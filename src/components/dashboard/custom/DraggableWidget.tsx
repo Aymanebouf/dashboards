@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, ArrowUp, GripVertical, Settings, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, GripVertical, Settings, X, Maximize2, ChevronUp, ChevronDown } from 'lucide-react';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import { WidgetConfig } from '@/services/dashboardService';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface DraggableWidgetProps {
   widget: WidgetConfig;
@@ -25,6 +26,7 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
 }) => {
   const { id, type, title, config } = widget;
   const [isHovering, setIsHovering] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   const renderWidget = () => {
     if (type === 'kpi') {
@@ -33,21 +35,20 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
       
       return (
         <div className="h-full flex flex-col justify-center items-center pt-4">
-          <div className="text-3xl font-bold mb-2">{config.value}</div>
+          <div className="text-3xl font-bold mb-2 bg-gradient-to-br from-foreground to-foreground/80 bg-clip-text">
+            {config.value}
+          </div>
           {config.trend && (
-            <div className={cn(
-              "trend-badge",
-              isPositive ? "trend-badge-positive" : "trend-badge-negative"
-            )}>
+            <Badge variant={isPositive ? "success" : "destructive"} className="flex items-center gap-1 py-1">
               {isPositive ? (
                 <ArrowUp size={14} />
               ) : (
                 <ArrowDown size={14} />
               )}
               <span>{config.trend}</span>
-            </div>
+            </Badge>
           )}
-          <p className="text-sm text-muted-foreground mt-2 text-center">
+          <p className="text-sm text-muted-foreground mt-3 text-center px-2">
             {config.description}
           </p>
         </div>
@@ -59,7 +60,7 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
           data={config.data}
           type={config.type}
           colors={config.colors}
-          height={200}
+          height={isExpanded ? 300 : 200}
           showControls={false}
         />
       );
@@ -75,7 +76,8 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
           {...provided.draggableProps}
           className={cn(
             "relative transition-all duration-300",
-            snapshot.isDragging ? "z-10" : ""
+            snapshot.isDragging ? "z-10" : "",
+            isExpanded ? "md:col-span-2 md:row-span-2" : ""
           )}
           style={{
             ...provided.draggableProps.style,
@@ -84,23 +86,40 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
           onMouseLeave={() => setIsHovering(false)}
         >
           <Card className={cn(
-            "h-full shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border-border/40 widget-theme-glass",
+            "h-full shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-border/40",
             snapshot.isDragging ? "ring-2 ring-primary shadow-xl scale-[1.02]" : "",
-            isHovering && !snapshot.isDragging ? "scale-[1.01]" : ""
+            isHovering && !snapshot.isDragging ? "scale-[1.01]" : "",
+            isExpanded ? "col-span-2 row-span-2" : "",
+            type === 'kpi' ? "bg-gradient-to-br from-card to-background" : "bg-card"
           )}>
-            <CardHeader className="pb-2 flex flex-row items-center justify-between widget-header-modern">
-              <CardTitle className="text-sm font-medium">{title}</CardTitle>
-              {isEditing && (
+            <CardHeader className={cn(
+              "flex flex-row items-center justify-between pb-2",
+              "border-b border-border/20"
+            )}>
+              <CardTitle className="text-sm font-medium flex items-center">
+                {title}
+                {!isEditing && type === 'chart' && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-6 w-6 ml-2 hover:bg-background"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                  >
+                    {isExpanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                  </Button>
+                )}
+              </CardTitle>
+              {isEditing ? (
                 <div className="flex space-x-1">
                   <div {...provided.dragHandleProps} className="cursor-move">
-                    <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-primary/10 text-muted-foreground hover:text-foreground">
+                    <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-background/80 text-muted-foreground hover:text-foreground">
                       <GripVertical size={14} />
                     </Button>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-6 w-6 hover:bg-primary/10 text-muted-foreground hover:text-foreground"
+                    className="h-6 w-6 hover:bg-background/80 text-muted-foreground hover:text-foreground"
                     onClick={() => onEdit(widget)}
                   >
                     <Settings size={14} />
@@ -108,15 +127,25 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-6 w-6 hover:bg-destructive/10 text-destructive"
+                    className="h-6 w-6 hover:bg-destructive/10 text-destructive hover:text-destructive/80"
                     onClick={() => onRemove(id)}
                   >
                     <X size={14} />
                   </Button>
                 </div>
+              ) : (
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "text-xs font-normal bg-background/50 hover:bg-background transition-colors",
+                    type === 'kpi' ? "text-primary/80" : "text-secondary/80"
+                  )}
+                >
+                  {type === 'kpi' ? 'KPI' : config.type}
+                </Badge>
               )}
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-2">
               {renderWidget()}
             </CardContent>
           </Card>

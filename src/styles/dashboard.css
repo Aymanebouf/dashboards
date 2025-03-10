@@ -1,5 +1,5 @@
 
-/* Styles pour les widgets draggables */
+/* Base styles for draggable widgets */
 .draggable-widget {
   cursor: move;
   transition: box-shadow 0.3s ease, transform 0.2s ease;
@@ -18,7 +18,7 @@
   z-index: 10;
 }
 
-/* Styles pour react-grid-layout */
+/* React Grid Layout styles */
 .react-grid-item {
   transition: all 200ms ease;
   transition-property: left, top, right;
@@ -27,8 +27,8 @@
 }
 
 .react-grid-item.react-grid-placeholder {
-  background: #f0f9ff;
-  border: 2px dashed #90cdf4;
+  background: rgba(56, 189, 248, 0.1);
+  border: 2px dashed rgba(56, 189, 248, 0.4);
   border-radius: 1rem;
   z-index: 2;
   transition-duration: 100ms;
@@ -80,7 +80,7 @@ html.dark .react-grid-item.react-grid-placeholder {
   padding-bottom: 10px;
 }
 
-/* Widget themes */
+/* Widget themes with glassmorphism effect */
 .widget-theme-default {
   background: white;
   border: 1px solid rgba(230, 230, 230, 0.5);
@@ -112,7 +112,7 @@ html.dark .widget-theme-gradient {
   border: 1px solid rgba(79, 70, 229, 0.2);
 }
 
-/* Widget header styles */
+/* Modern widget header styles */
 .widget-header-modern {
   border-bottom: 1px solid rgba(230, 230, 230, 0.5);
   padding: 0.75rem 1rem;
@@ -144,4 +144,47 @@ html.dark .widget-header-modern {
 .trend-badge-negative {
   background-color: rgba(239, 68, 68, 0.1);
   color: rgb(239, 68, 68);
+}
+
+/* Card hover effects */
+.card-hover-effect {
+  transition: all 0.3s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Shadow and glow effects */
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 25px rgba(79, 70, 229, 0.2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.glow-effect:hover::after {
+  opacity: 1;
+}
+
+/* Enhanced animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
 }

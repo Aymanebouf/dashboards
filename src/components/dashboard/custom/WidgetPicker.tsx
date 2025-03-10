@@ -1,98 +1,114 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
-import { getAvailableWidgetData } from '@/services/dashboardService';
-import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
+import { BarChart3, PieChart, LineChart, Activity, Award, TrendingUp, PanelTop } from 'lucide-react';
+import { WidgetType } from '@/models/dashboard';
+import { cn } from '@/lib/utils';
 
 interface WidgetPickerProps {
-  onAddWidget: (widgetType: 'kpi' | 'chart', sourceId: string) => void;
+  onAddWidget: (type: WidgetType) => void;
 }
 
 const WidgetPicker: React.FC<WidgetPickerProps> = ({ onAddWidget }) => {
-  const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'kpi' | 'chart'>('kpi');
-  
-  const availableData = getAvailableWidgetData();
-  
-  const handleAddWidget = (widgetType: 'kpi' | 'chart', sourceId: string) => {
-    onAddWidget(widgetType, sourceId);
-    setOpen(false);
-    toast.success(`Widget ajouté au tableau de bord`);
-  };
+  // Widget type definitions with descriptions and icons
+  const widgetTypes = [
+    {
+      type: 'kpi' as WidgetType,
+      label: 'KPI',
+      description: 'Indicateur de performance',
+      icon: <Award className="h-5 w-5" />,
+      colorClass: 'from-blue-500 to-purple-600',
+      bgClass: 'bg-blue-500/10',
+      hoverClass: 'hover:bg-blue-500/20',
+      borderClass: 'border-blue-500/30'
+    },
+    {
+      type: 'chart' as WidgetType,
+      label: 'Graphique à barres',
+      description: 'Visualisation de données par catégories',
+      icon: <BarChart3 className="h-5 w-5" />,
+      colorClass: 'from-green-500 to-emerald-600',
+      bgClass: 'bg-green-500/10',
+      hoverClass: 'hover:bg-green-500/20',
+      borderClass: 'border-green-500/30'
+    },
+    {
+      type: 'chart' as WidgetType,
+      label: 'Graphique linéaire',
+      description: 'Tendance sur une période',
+      icon: <LineChart className="h-5 w-5" />,
+      colorClass: 'from-purple-500 to-pink-600',
+      bgClass: 'bg-purple-500/10',
+      hoverClass: 'hover:bg-purple-500/20',
+      borderClass: 'border-purple-500/30',
+      chartType: 'line'
+    },
+    {
+      type: 'chart' as WidgetType,
+      label: 'Graphique circulaire',
+      description: 'Distribution en pourcentage',
+      icon: <PieChart className="h-5 w-5" />,
+      colorClass: 'from-orange-500 to-red-600',
+      bgClass: 'bg-orange-500/10',
+      hoverClass: 'hover:bg-orange-500/20',
+      borderClass: 'border-orange-500/30',
+      chartType: 'pie'
+    },
+    {
+      type: 'chart' as WidgetType,
+      label: 'Graphique zone',
+      description: 'Volume sur une période',
+      icon: <Activity className="h-5 w-5" />,
+      colorClass: 'from-cyan-500 to-blue-600',
+      bgClass: 'bg-cyan-500/10',
+      hoverClass: 'hover:bg-cyan-500/20',
+      borderClass: 'border-cyan-500/30',
+      chartType: 'area'
+    },
+    {
+      type: 'chart' as WidgetType,
+      label: 'Graphique composé',
+      description: 'Combinaison de styles',
+      icon: <PanelTop className="h-5 w-5" />,
+      colorClass: 'from-indigo-500 to-violet-600',
+      bgClass: 'bg-indigo-500/10',
+      hoverClass: 'hover:bg-indigo-500/20',
+      borderClass: 'border-indigo-500/30',
+      chartType: 'composed'
+    }
+  ];
 
-  const getTrendVariant = (trend: string) => {
-    if (trend.startsWith('+')) return 'success';
-    if (trend.startsWith('-')) return 'destructive';
-    return 'outline';
-  };
-  
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
-          <Plus size={16} />
-          <span>Ajouter un widget</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Ajouter un widget</DialogTitle>
-        </DialogHeader>
-        
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'kpi' | 'chart')} className="mt-4">
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="kpi">Indicateurs clés</TabsTrigger>
-            <TabsTrigger value="chart">Graphiques</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="kpi" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {availableData.kpi.map((kpi) => (
-                <Card key={kpi.id} className="cursor-pointer hover:bg-accent/20 transition-colors" onClick={() => handleAddWidget('kpi', kpi.id)}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex justify-between">
-                      {kpi.title}
-                      <Badge variant={getTrendVariant(kpi.trend)} className="ml-2">{kpi.trend}</Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{kpi.value}</div>
-                    <p className="text-xs text-muted-foreground mt-1">{kpi.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      {widgetTypes.map((widget, index) => (
+        <div 
+          key={index}
+          className={cn(
+            "rounded-lg border transition-all duration-300",
+            "hover:shadow-md cursor-pointer",
+            widget.borderClass
+          )}
+          onClick={() => onAddWidget(widget.type === 'chart' ? 'chart' : widget.type)}
+        >
+          <div className={cn(
+            "flex flex-col items-center p-4 h-full rounded-lg text-center",
+            widget.hoverClass,
+            "transition-colors duration-300",
+            widget.bgClass
+          )}>
+            <div className={cn(
+              "w-12 h-12 rounded-full flex items-center justify-center mb-3",
+              "bg-gradient-to-br text-white shadow-sm",
+              widget.colorClass
+            )}>
+              {widget.icon}
             </div>
-          </TabsContent>
-          
-          <TabsContent value="chart" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {availableData.charts.map((chart) => (
-                <Card key={chart.id} className="cursor-pointer hover:bg-accent/20 transition-colors" onClick={() => handleAddWidget('chart', chart.id)}>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">{chart.title}</CardTitle>
-                    <CardDescription className="text-xs">Type: {chart.type}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-28 overflow-hidden">
-                    {/* Aperçu du graphique ici */}
-                    <div className="w-full h-full bg-accent/10 rounded-md flex items-center justify-center text-muted-foreground">
-                      {chart.type === 'pie' ? 'Graphique en secteurs' : 
-                       chart.type === 'bar' ? 'Graphique en barres' : 
-                       chart.type === 'line' ? 'Graphique en lignes' : 
-                       'Aperçu graphique'}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+            <h4 className="font-medium text-sm mb-1">{widget.label}</h4>
+            <p className="text-xs text-muted-foreground">{widget.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 

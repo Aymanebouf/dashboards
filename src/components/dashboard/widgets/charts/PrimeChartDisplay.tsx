@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { 
   BarChart, 
@@ -18,8 +17,7 @@ import {
   Pie, 
   Cell
 } from 'recharts';
-
-type ChartType = 'bar' | 'line' | 'area' | 'pie' | 'composed';
+import { ChartType } from '@/models/chart';
 
 interface PrimeChartDisplayProps {
   type: ChartType;

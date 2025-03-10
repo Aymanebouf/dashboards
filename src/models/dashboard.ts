@@ -3,6 +3,9 @@
  * Dashboard data models/interfaces
  */
 
+// Widget type definition
+export type WidgetType = 'kpi' | 'chart';
+
 // KPI Card data structure
 export interface KPICardData {
   id: string;
@@ -36,7 +39,7 @@ export interface DashboardKPIData {
 // Custom widget configuration
 export interface WidgetConfig {
   id: string;
-  type: 'kpi' | 'chart';
+  type: WidgetType;
   title: string;
   sourceData: string;
   size: [number, number]; // [width, height] in grid units

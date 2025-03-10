@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -24,10 +23,9 @@ import {
 import { ChevronDown, Download, BarChart2, LineChart as LineChartIcon, PieChart as PieChartIcon, FileText, Trash2, Edit3 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { ChartType } from '@/models/chart';
 
-type ChartType = 'bar' | 'line' | 'area' | 'pie' | 'composed';
-
-interface ChartWidgetProps {
+type Props = {
   title: string;
   data: any[];
   type?: ChartType;
@@ -94,7 +92,7 @@ const downloadPDF = async (elementRef: React.RefObject<HTMLDivElement>, filename
   }
 };
 
-const ChartWidget: React.FC<ChartWidgetProps> = ({
+const ChartWidget: React.FC<Props> = ({
   title,
   data,
   type = 'bar',

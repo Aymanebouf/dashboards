@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { WidgetConfig } from '@/services/dashboardService';
 import { Badge } from '@/components/ui/badge';
-import { ChartType } from '@/components/dashboard/widgets/ChartWidget';
+import { ChartType } from '@/models/chart';
 import { Settings, PieChart, BarChart2, LineChart, Activity } from 'lucide-react';
 
 interface EditWidgetDialogProps {

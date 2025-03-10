@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className={cn(
-      "h-16 fixed top-0 border-b border-border bg-background z-20 transition-all duration-300 flex items-center",
+      "h-16 fixed top-0 border-b border-border/40 bg-background/80 backdrop-blur-md z-20 transition-all duration-300 flex items-center",
       sidebarExpanded ? "left-64 right-0" : "left-16 right-0"
     )}>
       <div className="px-4 flex items-center justify-between w-full">
@@ -32,35 +32,37 @@ const Header: React.FC<HeaderProps> = ({
             variant="ghost"
             size="icon"
             onClick={onSidebarToggle}
-            className="mr-4"
+            className="mr-4 text-muted-foreground hover:text-foreground hover:bg-primary/5"
           >
-            {sidebarExpanded ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {sidebarExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
           </Button>
           
           <div className="flex items-center">
-            <LayoutDashboard className="mr-2 h-5 w-5 text-muted-foreground" />
-            <h1 className="text-xl font-semibold">{title}</h1>
+            <LayoutDashboard className="mr-2 h-5 w-5 text-primary" />
+            <h1 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              {title}
+            </h1>
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
           <div className="relative hidden md:block">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Rechercher..."
-              className="w-64 pl-8 rounded-full bg-muted/50 border-none focus-visible:ring-1"
+              className="w-72 pl-10 rounded-full bg-background border-border/40 focus-visible:ring-primary/20"
             />
           </div>
 
-          <Button variant="outline" size="icon" className="rounded-full">
+          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground hover:bg-primary/5">
             <Bell size={18} />
           </Button>
 
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="icon" 
-            className="rounded-full" 
+            className="rounded-full text-muted-foreground hover:text-foreground hover:bg-primary/5" 
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -68,15 +70,15 @@ const Header: React.FC<HeaderProps> = ({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
+              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                <Avatar className="h-9 w-9 ring-2 ring-background">
                   <AvatarImage src="/avatar.jpg" alt="@user" />
-                  <AvatarFallback className="bg-primary/10 text-primary">U</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">U</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
+            <DropdownMenuContent className="w-56 mt-1 p-2" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal p-2">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">Admin</p>
                   <p className="text-xs leading-none text-muted-foreground">
@@ -84,22 +86,22 @@ const Header: React.FC<HeaderProps> = ({
                   </p>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem className="rounded-md cursor-pointer p-2 flex gap-2">
+                <User className="h-4 w-4" />
                 <span>Profil</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
+              <DropdownMenuItem className="rounded-md cursor-pointer p-2 flex gap-2">
+                <Settings className="h-4 w-4" />
                 <span>Paramètres</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BarChart2 className="mr-2 h-4 w-4" />
+              <DropdownMenuItem className="rounded-md cursor-pointer p-2 flex gap-2">
+                <BarChart2 className="h-4 w-4" />
                 <span>Analytics</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                Log out
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem className="rounded-md cursor-pointer p-2 text-destructive">
+                Déconnexion
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

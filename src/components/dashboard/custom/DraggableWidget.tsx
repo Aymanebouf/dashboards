@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Move, Settings } from 'lucide-react';
+import { ArrowDown, ArrowUp, GripVertical, Settings, X } from 'lucide-react';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
 import { WidgetConfig } from '@/services/dashboardService';
+import { cn } from '@/lib/utils';
 
 interface DraggableWidgetProps {
   widget: WidgetConfig;
@@ -23,22 +24,30 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
   isEditing
 }) => {
   const { id, type, title, config } = widget;
+  const [isHovering, setIsHovering] = useState(false);
   
   const renderWidget = () => {
     if (type === 'kpi') {
+      const trendValue = config.trend || "";
+      const isPositive = trendValue.startsWith('+');
+      
       return (
-        <div className="h-full flex flex-col justify-center">
-          <div className="text-2xl font-bold">{config.value}</div>
+        <div className="h-full flex flex-col justify-center items-center pt-4">
+          <div className="text-3xl font-bold mb-2">{config.value}</div>
           {config.trend && (
-            <p className="text-xs text-muted-foreground">
-              {config.trend.startsWith('+') ? (
-                <span className="text-green-500">{config.trend}</span>
+            <div className={cn(
+              "trend-badge",
+              isPositive ? "trend-badge-positive" : "trend-badge-negative"
+            )}>
+              {isPositive ? (
+                <ArrowUp size={14} />
               ) : (
-                <span className="text-red-500">{config.trend}</span>
-              )} par rapport au mois dernier
-            </p>
+                <ArrowDown size={14} />
+              )}
+              <span>{config.trend}</span>
+            </div>
           )}
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2 text-center">
             {config.description}
           </p>
         </div>
@@ -64,25 +73,34 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`relative ${snapshot.isDragging ? 'z-10' : ''}`}
+          className={cn(
+            "relative transition-all duration-300",
+            snapshot.isDragging ? "z-10" : ""
+          )}
           style={{
             ...provided.draggableProps.style,
           }}
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
         >
-          <Card className={`h-full shadow-md hover:shadow-lg transition-shadow duration-300 ${snapshot.isDragging ? 'ring-2 ring-primary' : ''}`}>
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <Card className={cn(
+            "h-full shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border-border/40 widget-theme-glass",
+            snapshot.isDragging ? "ring-2 ring-primary shadow-xl scale-[1.02]" : "",
+            isHovering && !snapshot.isDragging ? "scale-[1.01]" : ""
+          )}>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between widget-header-modern">
               <CardTitle className="text-sm font-medium">{title}</CardTitle>
               {isEditing && (
                 <div className="flex space-x-1">
                   <div {...provided.dragHandleProps} className="cursor-move">
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <Move size={14} />
+                    <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-primary/10 text-muted-foreground hover:text-foreground">
+                      <GripVertical size={14} />
                     </Button>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-6 w-6"
+                    className="h-6 w-6 hover:bg-primary/10 text-muted-foreground hover:text-foreground"
                     onClick={() => onEdit(widget)}
                   >
                     <Settings size={14} />
@@ -90,7 +108,7 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-6 w-6 text-destructive"
+                    className="h-6 w-6 hover:bg-destructive/10 text-destructive"
                     onClick={() => onRemove(id)}
                   >
                     <X size={14} />
@@ -98,7 +116,7 @@ const DraggableWidget: React.FC<DraggableWidgetProps> = ({
                 </div>
               )}
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {renderWidget()}
             </CardContent>
           </Card>

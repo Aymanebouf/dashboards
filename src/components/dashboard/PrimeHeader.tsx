@@ -38,7 +38,7 @@ const PrimeHeader: React.FC<HeaderProps> = ({
       separator: true
     },
     {
-      label: 'Log out',
+      label: 'Déconnexion',
       icon: 'pi pi-sign-out'
     }
   ];
@@ -53,8 +53,8 @@ const PrimeHeader: React.FC<HeaderProps> = ({
         className="mr-3"
       />
       <div className="flex align-items-center">
-        <i className="pi pi-th-large mr-2 text-color-secondary"></i>
-        <h1 className="text-xl font-semibold m-0">{title}</h1>
+        <i className="pi pi-th-large mr-2 text-primary"></i>
+        <h1 className="text-xl font-semibold m-0 text-gradient">{title}</h1>
       </div>
     </div>
   );
@@ -66,23 +66,24 @@ const PrimeHeader: React.FC<HeaderProps> = ({
         <InputText placeholder="Rechercher..." className="p-inputtext-sm" />
       </span>
 
-      <Button icon="pi pi-bell" rounded text />
+      <Button icon="pi pi-bell" rounded text className="p-button-text-info p-button-rounded" />
       
       <Button 
         icon={theme === 'dark' ? "pi pi-sun" : "pi pi-moon"} 
         rounded 
         text 
         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        className="p-button-rounded"
       />
 
       <div>
         <Avatar 
           image="/avatar.jpg" 
           shape="circle" 
-          className="cursor-pointer" 
+          className="cursor-pointer shadow-sm border-2 border-primary-100" 
           onClick={(e) => userMenuRef.current?.toggle(e)}
         />
-        <Menu model={userMenuItems} popup ref={userMenuRef} />
+        <Menu model={userMenuItems} popup ref={userMenuRef} className="surface-overlay shadow-lg border-round-md" />
       </div>
     </div>
   );
@@ -92,7 +93,12 @@ const PrimeHeader: React.FC<HeaderProps> = ({
       <Toolbar
         start={startContent}
         end={endContent}
-        className="border-none p-fluid"
+        className="border-none p-fluid glass-toolbar"
+        style={{ 
+          background: 'var(--surface-section)',
+          borderBottom: '1px solid var(--surface-border)',
+          backdropFilter: 'blur(10px)'
+        }}
       />
     </div>
   );

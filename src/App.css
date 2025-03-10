@@ -36,17 +36,66 @@
 
 .card {
   padding: 2em;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   background-color: var(--surface-card);
   transition: all 0.3s ease;
+  border: 1px solid rgba(230, 230, 230, 0.5);
 }
 
 .card:hover {
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
 }
 
 .read-the-docs {
   color: var(--text-color-secondary);
   font-size: 0.9em;
+}
+
+/* Professional styles */
+.gradient-heading {
+  background-image: linear-gradient(90deg, var(--logitag-primary), var(--logitag-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.glass-button {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Dashboard card styles */
+.stat-card {
+  border-radius: 1rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,245,245,0.7));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+
+html.dark .stat-card {
+  background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.7));
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+html.dark .stat-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }

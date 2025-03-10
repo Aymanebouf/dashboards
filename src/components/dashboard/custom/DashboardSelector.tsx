@@ -1,13 +1,13 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown, FolderPlus, LayoutDashboard } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
 import { toast } from 'sonner';
 import { DashboardConfig, saveDashboard } from '@/services/dashboardService';
+import { cn } from '@/lib/utils';
 
 interface DashboardSelectorProps {
   dashboards: DashboardConfig[];
@@ -46,40 +46,51 @@ const DashboardSelector: React.FC<DashboardSelectorProps> = ({ dashboards, selec
     <div className="flex gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2">
-            {selectedDashboard ? selectedDashboard.name : 'Sélectionner un tableau de bord'}
-            <ChevronDown size={16} />
+          <Button variant="outline" className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border-border/40 shadow-sm">
+            <LayoutDashboard size={16} className="text-primary" />
+            <span className="font-medium truncate max-w-[150px]">
+              {selectedDashboard ? selectedDashboard.name : 'Sélectionner un tableau de bord'}
+            </span>
+            <ChevronDown size={14} className="text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-border/40 shadow-lg rounded-lg p-1">
           {dashboards.length > 0 ? (
             dashboards.map((dashboard) => (
               <DropdownMenuItem 
                 key={dashboard.id} 
                 onClick={() => onSelect(dashboard.id)}
-                className={dashboard.id === selectedId ? 'bg-accent/50' : ''}
+                className={cn(
+                  "flex items-center gap-2 rounded-md py-2 px-3 cursor-pointer transition-colors",
+                  dashboard.id === selectedId 
+                    ? "bg-primary/10 text-primary font-medium" 
+                    : "hover:bg-accent"
+                )}
               >
-                {dashboard.name}
+                <LayoutDashboard size={16} className={dashboard.id === selectedId ? "text-primary" : "text-muted-foreground"} />
+                <span className="truncate">{dashboard.name}</span>
               </DropdownMenuItem>
             ))
           ) : (
-            <DropdownMenuItem disabled>Aucun tableau de bord disponible</DropdownMenuItem>
+            <DropdownMenuItem disabled className="text-muted-foreground italic">
+              Aucun tableau de bord disponible
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
 
       <Dialog open={isNewDashboardDialogOpen} onOpenChange={setIsNewDashboardDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline">
-            <Plus size={16} className="mr-2" />
+          <Button variant="outline" className="bg-background/80 backdrop-blur-sm border-border/40 shadow-sm">
+            <FolderPlus size={16} className="mr-2 text-primary" />
             Nouveau
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-md border-border/40 shadow-lg rounded-lg">
           <DialogHeader>
-            <DialogTitle>Créer un nouveau tableau de bord</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">Créer un nouveau tableau de bord</DialogTitle>
             <DialogDescription>
-              Entrez un nom pour votre nouveau tableau de bord.
+              Entrez un nom pour votre nouveau tableau de bord personnalisé.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -87,12 +98,17 @@ const DashboardSelector: React.FC<DashboardSelectorProps> = ({ dashboards, selec
               value={newDashboardName}
               onChange={(e) => setNewDashboardName(e.target.value)}
               placeholder="Nom du tableau de bord"
+              className="bg-background/50 border-border/40"
               autoFocus
             />
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsNewDashboardDialogOpen(false)} variant="outline">Annuler</Button>
-            <Button onClick={handleCreateNewDashboard}>Créer</Button>
+            <Button onClick={() => setIsNewDashboardDialogOpen(false)} variant="outline" className="border-border/40">
+              Annuler
+            </Button>
+            <Button onClick={handleCreateNewDashboard} className="bg-primary hover:bg-primary/90">
+              Créer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -3,15 +3,18 @@
 .draggable-widget {
   cursor: move;
   transition: box-shadow 0.3s ease, transform 0.2s ease;
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
 .draggable-widget:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
 }
 
 .draggable-widget.dragging {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  transform: scale(1.02);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 10px 20px -10px rgba(0, 0, 0, 0.1);
+  transform: scale(1.03);
   z-index: 10;
 }
 
@@ -19,15 +22,22 @@
 .react-grid-item {
   transition: all 200ms ease;
   transition-property: left, top, right;
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
 .react-grid-item.react-grid-placeholder {
   background: #f0f9ff;
   border: 2px dashed #90cdf4;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   z-index: 2;
   transition-duration: 100ms;
   opacity: 0.7;
+}
+
+html.dark .react-grid-item.react-grid-placeholder {
+  background: rgba(56, 189, 248, 0.1);
+  border: 2px dashed rgba(56, 189, 248, 0.4);
 }
 
 .react-grid-item.resizing {
@@ -40,13 +50,13 @@
   z-index: 3;
   will-change: transform;
   cursor: move;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 10px 20px -10px rgba(0, 0, 0, 0.1);
 }
 
 .react-grid-item > .react-resizable-handle {
   position: absolute;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   bottom: 0;
   right: 0;
   background-position: bottom right;
@@ -56,10 +66,82 @@
   box-sizing: border-box;
   cursor: se-resize;
   filter: invert(50%);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
 }
 
 .react-grid-item > .react-resizable-handle.react-resizable-handle-se {
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='10' height='10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h10v10H0z' fill='%23000' fill-rule='evenodd'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M22 22L12 12M22 22H14M22 22V14' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   padding-right: 10px;
   padding-bottom: 10px;
+}
+
+/* Widget themes */
+.widget-theme-default {
+  background: white;
+  border: 1px solid rgba(230, 230, 230, 0.5);
+}
+
+html.dark .widget-theme-default {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.widget-theme-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+html.dark .widget-theme-glass {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.widget-theme-gradient {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(236, 72, 153, 0.1));
+  border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+html.dark .widget-theme-gradient {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(236, 72, 153, 0.15));
+  border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+/* Widget header styles */
+.widget-header-modern {
+  border-bottom: 1px solid rgba(230, 230, 230, 0.5);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+html.dark .widget-header-modern {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* KPI Badge styles */
+.trend-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.trend-badge-positive {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: rgb(16, 185, 129);
+}
+
+.trend-badge-negative {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: rgb(239, 68, 68);
 }

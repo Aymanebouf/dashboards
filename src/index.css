@@ -6,9 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary-color: #6366f1;
-  --primary-color-light: rgba(99, 102, 241, 0.1);
-  --secondary-color: #f471b5;
+  --primary-color: #4f46e5;
+  --primary-color-light: rgba(79, 70, 229, 0.1);
+  --secondary-color: #ec4899;
   --text-color: #1e293b;
   --text-color-secondary: #64748b;
   --surface-ground: #f8fafc;
@@ -17,8 +17,8 @@
   --surface-overlay: #ffffff;
   --surface-border: #e2e8f0;
   --surface-hover: #f1f5f9;
-  --logitag-primary: #6366f1;
-  --logitag-secondary: #f471b5;
+  --logitag-primary: #4f46e5;
+  --logitag-secondary: #ec4899;
   --logitag-blue: #3b82f6;
   --logitag-red: #ef4444;
   --logitag-green: #10b981;
@@ -43,7 +43,7 @@ html.dark {
 }
 
 body {
-  font-family: 'Manrope', 'Inter', sans-serif;
+  font-family: 'Inter', 'Manrope', sans-serif;
   color: var(--text-color);
   background-color: var(--surface-ground);
   margin: 0;
@@ -54,12 +54,13 @@ body {
 .dashboard-card {
   background: var(--surface-card);
   border-radius: 0.75rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .dashboard-card:hover {
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
 .dashboard-widget {
@@ -82,7 +83,20 @@ body {
   padding: 1rem;
 }
 
-/* Animations */
+/* Glassmorphism styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+html.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+/* Enhanced Animations */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -98,6 +112,11 @@ body {
   50% { opacity: 0.8; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
@@ -108,6 +127,10 @@ body {
 
 .animate-pulse-gentle {
   animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* Custom scrollbars */
@@ -159,7 +182,7 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background-color: white;
   border: 1px solid #dfe7ef;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .dropdown-menu.dark {
@@ -184,4 +207,23 @@ html.dark .dropdown-item {
 
 html.dark .dropdown-item:hover {
   background-color: rgba(139, 92, 246, 0.2);
+}
+
+/* Professional design elements */
+.dashboard-header {
+  background: linear-gradient(135deg, var(--logitag-primary), var(--logitag-secondary));
+  color: white;
+  border-radius: 0.75rem;
+}
+
+.glossy-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+
+html.dark .glossy-card {
+  background: linear-gradient(135deg, rgba(30,41,59,0.9), rgba(30,41,59,0.7));
+  border: 1px solid rgba(255,255,255,0.1);
 }

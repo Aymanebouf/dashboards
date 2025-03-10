@@ -34,7 +34,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         sidebarExpanded ? "ml-64" : "ml-16"
       )}>
         <div className="p-6">
-          {children}
+          <div className="animate-fade-in">
+            {children}
+          </div>
         </div>
       </main>
     </div>

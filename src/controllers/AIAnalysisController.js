@@ -1,18 +1,18 @@
 
 import { useState } from 'react';
-import { analyzeWithAI, AIAnalysisResponse } from '@/services/aiService';
+import { analyzeWithAI } from '@/services/aiService';
 import { toast } from 'sonner';
 
 /**
  * Controller for AI Analysis functionality
  * Separates business logic from UI components
  */
-export const useAIAnalysisController = (isAIConfigured: boolean | null) => {
+export const useAIAnalysisController = (isAIConfigured) => {
   const [userPrompt, setUserPrompt] = useState('');
   const [isProcessingPrompt, setIsProcessingPrompt] = useState(false);
-  const [aiRemarks, setAiRemarks] = useState<string[]>([]);
-  const [customDashboard, setCustomDashboard] = useState<any[]>([]);
-  const [aiResponse, setAIResponse] = useState<AIAnalysisResponse | null>(null);
+  const [aiRemarks, setAiRemarks] = useState([]);
+  const [customDashboard, setCustomDashboard] = useState([]);
+  const [aiResponse, setAIResponse] = useState(null);
 
   /**
    * Handles the prompt submission and AI analysis
@@ -44,7 +44,7 @@ export const useAIAnalysisController = (isAIConfigured: boolean | null) => {
       setCustomDashboard(Array.isArray(result.customInsights) ? result.customInsights : []);
       
       toast.success('Tableau de bord personnalisé généré !');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erreur lors de l\'analyse:', error);
       
       if (error.code === 'ERR_NETWORK') {

@@ -1,27 +1,16 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Brain, SendHorizonal, Loader2, AlertCircle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
+import { Button } from 'primereact/button';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Card } from 'primereact/card';
+import { Message } from 'primereact/message';
 import ChartWidget from './widgets/ChartWidget';
-import { AIAnalysisResponse, analyzeWithAI } from '@/services/aiService';
-import { toast } from 'sonner';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAIAnalysisController } from '@/controllers/AIAnalysisController';
-
-interface AIAnalysisSectionProps {
-  isAIConfigured: boolean | null;
-  errorMessage: string | null;
-}
 
 /**
  * Component for AI analysis functionality in dashboard
  */
-const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({ 
-  isAIConfigured,
-  errorMessage
-}) => {
+const AIAnalysisSection = ({ isAIConfigured, errorMessage }) => {
   // Using the controller to handle business logic
   const {
     userPrompt,
@@ -35,54 +24,39 @@ const AIAnalysisSection: React.FC<AIAnalysisSectionProps> = ({
   return (
     <>
       {errorMessage && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erreur</AlertTitle>
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
+        <Message severity="error" text={errorMessage} className="mb-4 w-full" />
       )}
       
       <div className="flex gap-4">
         <div className="w-2/3 space-y-4">
           <div className="flex gap-2">
-            <Textarea 
+            <InputTextarea 
               placeholder="Exemple: Je veux voir les engins qui sont en retard l'année précédente"
               value={userPrompt}
               onChange={(e) => setUserPrompt(e.target.value)}
-              className="min-h-24"
+              className="min-h-24 w-full"
+              rows={4}
             />
           </div>
           <Button 
             className="ml-auto flex items-center" 
             onClick={handlePromptSubmit}
             disabled={isProcessingPrompt || !userPrompt.trim() || isAIConfigured === false}
-          >
-            {isProcessingPrompt ? (
-              <>
-                <Loader2 size={16} className="mr-2 animate-spin" />
-                Analyse en cours...
-              </>
-            ) : (
-              <>
-                <SendHorizonal size={16} className="mr-2" />
-                Générer le tableau de bord
-              </>
-            )}
-          </Button>
+            icon={isProcessingPrompt ? "pi pi-spin pi-spinner" : "pi pi-send"}
+            label={isProcessingPrompt ? "Analyse en cours..." : "Générer le tableau de bord"}
+          />
           
           {customDashboard && customDashboard.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               {customDashboard.map((chart, index) => (
                 <Card key={index}>
-                  <CardContent className="pt-6">
-                    <ChartWidget
-                      title={chart.title || ""}
-                      data={Array.isArray(chart.data) ? chart.data : []}
-                      type={chart.type || "bar"}
-                      colors={Array.isArray(chart.colors) ? chart.colors : ["#1E88E5"]}
-                      height={240}
-                    />
-                  </CardContent>
+                  <ChartWidget
+                    title={chart.title || ""}
+                    data={Array.isArray(chart.data) ? chart.data : []}
+                    type={chart.type || "bar"}
+                    colors={Array.isArray(chart.colors) ? chart.colors : ["#1E88E5"]}
+                    height={240}
+                  />
                 </Card>
               ))}
             </div>

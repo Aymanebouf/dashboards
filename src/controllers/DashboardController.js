@@ -11,8 +11,8 @@ import useDashboardData from '@/hooks/useDashboardData';
 export const useDashboardController = () => {
   const [activeTab, setActiveTab] = useState('principal');
   const [selectedDashboard, setSelectedDashboard] = useState('duree-presence');
-  const [isAIConfigured, setIsAIConfigured] = useState<boolean | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAIConfigured, setIsAIConfigured] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   
   // Get dashboard data from custom hook
   const { dashboardTitle, kpiData } = useDashboardData(selectedDashboard);
@@ -44,7 +44,7 @@ export const useDashboardController = () => {
   /**
    * Handles dashboard selection change
    */
-  const handleDashboardChange = (dashboardId: string) => {
+  const handleDashboardChange = (dashboardId) => {
     setSelectedDashboard(dashboardId);
   };
 

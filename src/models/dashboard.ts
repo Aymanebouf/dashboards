@@ -1,63 +1,28 @@
 
 /**
- * Dashboard data models/interfaces
+ * Dashboard related types
  */
 
 // Widget type definition
-export type WidgetType = 'kpi' | 'chart';
+export type WidgetType = 'kpi' | 'chart' | 'table';
 
-// KPI Card data structure
-export interface KPICardData {
+// Define the dashboard model structure here
+export interface Dashboard {
   id: string;
-  title: string;
-  value: string | number;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-  icon?: React.ReactNode;
+  name: string;
   description?: string;
-  color?: string;
+  widgets: WidgetConfig[];
+  lastModified?: Date;
+  createdAt?: Date;
+  userId?: string;
 }
 
-// Chart data structure
-export interface ChartData {
-  id: string;
-  title: string;
-  type: 'bar' | 'line' | 'area' | 'pie' | 'composed';
-  data: any[];
-  colors?: string[];
-  height?: number;
-}
-
-// Dashboard KPI data structure
-export interface DashboardKPIData {
-  kpiCards: KPICardData[];
-  charts: ChartData[];
-}
-
-// Custom widget configuration
+// Define widget configuration structure
 export interface WidgetConfig {
   id: string;
   type: WidgetType;
   title: string;
-  sourceData: string;
-  size: [number, number]; // [width, height] in grid units
-  position: [number, number]; // [x, y] position
-  config: any;
-}
-
-// Dashboard configuration
-export interface DashboardConfig {
-  id: string;
-  name: string;
-  lastModified: Date;
-  widgets: WidgetConfig[];
-}
-
-// AI Analysis Response structure
-export interface AIAnalysisResult {
-  remarks: string[];
-  customInsights: any[];
-  confidence: number;
+  size: [number, number]; // [columns, rows]
+  position?: [number, number]; // [x, y] - Optional for auto-positioning
+  config: any; // Specific configuration for the widget type
 }

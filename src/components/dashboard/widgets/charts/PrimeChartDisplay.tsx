@@ -241,7 +241,7 @@ const PrimeChartDisplay: React.FC<PrimeChartDisplayProps> = ({
   };
 
   return (
-    <div ref={chartRef} className="chart-container bg-white/60 dark:bg-slate-900/60 p-4 rounded-xl shadow-lg backdrop-blur-sm">
+    <div ref={chartRef} className="chart-container p-4 surface-card rounded-xl">
       {renderChart()}
     </div>
   );

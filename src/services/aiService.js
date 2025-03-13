@@ -32,22 +32,10 @@ api.interceptors.response.use(
   }
 );
 
-export interface AIAnalysisResponse {
-  response: string;
-  remarks: string[];
-  recommendations: string[];
-  customInsights: Array<{
-    title: string;
-    type: string;
-    data: any[];
-    colors: string[];
-  }>;
-}
-
 /**
  * Génère une réponse simulée en cas d'échec de connexion à l'API
  */
-const generateFallbackResponse = (prompt: string): AIAnalysisResponse => {
+const generateFallbackResponse = (prompt) => {
   console.log("Génération d'une réponse de secours locale (le serveur API est inaccessible)");
   
   return {
@@ -94,7 +82,7 @@ const generateFallbackResponse = (prompt: string): AIAnalysisResponse => {
 /**
  * Tente de se connecter à différentes URL d'API en cas d'échec
  */
-const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisResponse> => {
+const tryAlternativeEndpoints = async (prompt) => {
   // Liste des URLs à essayer, dans l'ordre
   const endpoints = [
     'http://localhost:5000/api/analyze-with-ai',
@@ -109,7 +97,7 @@ const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisRespon
     try {
       console.log(`Tentative de connexion à ${endpoint}...`);
       
-      const response = await axios.post<AIAnalysisResponse>(
+      const response = await axios.post(
         endpoint, 
         { prompt },
         { 
@@ -124,86 +112,66 @@ const tryAlternativeEndpoints = async (prompt: string): Promise<AIAnalysisRespon
       console.log(`Connexion réussie à ${endpoint}`, response.data);
       
       // Valider et normaliser la réponse
-      const validatedResponse: AIAnalysisResponse = {
+      return {
         response: response.data.response || "",
         remarks: Array.isArray(response.data.remarks) ? response.data.remarks : [],
         recommendations: Array.isArray(response.data.recommendations) ? response.data.recommendations : [],
         customInsights: Array.isArray(response.data.customInsights) ? response.data.customInsights : []
       };
-      
-      // Mettre à jour l'URL de base pour les prochains appels
-      api.defaults.baseURL = endpoint.substring(0, endpoint.lastIndexOf('/'));
-      console.log(`URL de base API mise à jour: ${api.defaults.baseURL}`);
-      
-      return validatedResponse;
     } catch (error) {
-      console.error(`Échec de connexion à ${endpoint}:`, error);
       lastError = error;
+      console.error(`Échec de connexion à ${endpoint}:`, error.message);
     }
   }
   
-  throw lastError;
+  // Si tous les endpoints échouent, retourner une réponse de secours
+  console.error('Tous les endpoints ont échoué. Dernière erreur:', lastError);
+  return generateFallbackResponse(prompt);
 };
 
 /**
- * Fonction principale pour analyser les données avec l'IA
+ * Vérifie si l'API d'IA est configurée et disponible
  */
-export const analyzeWithAI = async (prompt: string): Promise<AIAnalysisResponse> => {
+export const checkAIConfigured = async () => {
   try {
-    console.log('Envoi de la requête d\'analyse avec prompt:', prompt);
-    
-    try {
-      // Essayer les endpoints alternatifs
-      return await tryAlternativeEndpoints(prompt);
-    } catch (connectionError: any) {
-      console.error('Échec de toutes les tentatives de connexion:', connectionError);
-      
-      // Si l'erreur n'est pas liée au réseau, on la propage
-      if (connectionError.code !== 'ERR_NETWORK' && connectionError.code !== 'ECONNREFUSED') {
-        throw connectionError;
-      }
-      
-      // En cas d'erreur de connexion, générer une réponse de secours locale
-      toast.warning('Impossible de se connecter au serveur API. Mode de secours local activé.');
-      return generateFallbackResponse(prompt);
-    }
+    const response = await api.get('/check-ai-config');
+    return { configured: true, message: null };
   } catch (error) {
-    console.error('Erreur lors de l\'analyse avec IA:', error);
-    throw error;
+    if (error.response && error.response.data && error.response.data.error === "Clé API OpenAI non configurée") {
+      return { 
+        configured: false, 
+        message: "La clé API OpenAI n'est pas configurée. Les fonctionnalités d'IA ne sont pas disponibles." 
+      };
+    } else if (error.code === 'ERR_NETWORK') {
+      return { 
+        configured: null, 
+        message: "Impossible de se connecter au serveur API. Assurez-vous que le serveur Flask est en cours d'exécution (cd api && python app.py)." 
+      };
+    }
+    return { 
+      configured: null, 
+      message: "Erreur lors de la vérification de la configuration de l'API d'IA." 
+    };
   }
 };
 
 /**
- * Vérifie si la configuration de l'IA est disponible
+ * Analyse une requête avec l'IA
  */
-export const checkAIConfiguration = async (): Promise<boolean> => {
+export const analyzeWithAI = async (prompt) => {
   try {
-    console.log('Vérification de la configuration de l\'IA...');
-    
-    try {
-      // Essayer d'utiliser directement l'endpoint d'analyse
-      const result = await analyzeWithAI('Vérification de la configuration de l\'IA');
-      console.log('API accessible (en mode simulation ou réel):', result);
-      return true;
-    } catch (error: any) {
-      console.error('Erreur lors de la vérification de la configuration de l\'IA:', error);
-      
-      // Si nous avons une réponse mais avec une erreur concernant la clé API
-      if (error.response && error.response.data && error.response.data.error === "Clé API OpenAI non configurée") {
-        console.log('Clé API OpenAI non configurée, mais le mode simulation est disponible');
-        return true;
-      }
-      
-      // Si nous avons reçu une réponse du mode de secours local
-      if (error.remarks && error.remarks.includes("Mode secours local activé")) {
-        console.log('Mode secours local activé - le serveur API est inaccessible');
-        return false;
-      }
-      
-      return false;
-    }
+    const response = await api.post('/analyze-with-ai', { prompt });
+    console.log('AI response:', response.data);
+    return response.data;
   } catch (error) {
-    console.error('Erreur inattendue lors de la vérification de la configuration:', error);
-    return false;
+    console.error('Error in analyzeWithAI:', error);
+    
+    // En cas d'erreur réseau ou de service indisponible, essayer les endpoints alternatifs
+    if (error.code === 'ERR_NETWORK' || (error.response && error.response.status >= 500)) {
+      return tryAlternativeEndpoints(prompt);
+    }
+    
+    // Générer une réponse de secours en dernier recours
+    return generateFallbackResponse(prompt);
   }
 };

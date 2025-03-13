@@ -1,8 +1,64 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import { WidgetConfig, DashboardConfig } from '@/models/dashboard';
-import { getDashboard, saveDashboard, deleteDashboard } from '@/services/dashboardService';
+import { 
+  WidgetConfig, 
+  DashboardConfig, 
+  ServiceDashboardConfig,
+  ServiceWidgetConfig,
+  ServiceWidgetType
+} from '@/models/dashboard';
+import { 
+  getDashboard, 
+  saveDashboard, 
+  deleteDashboard 
+} from '@/services/dashboardService';
+
+/**
+ * Helper function to convert between model types
+ */
+const convertToDashboardConfig = (data: ServiceDashboardConfig): DashboardConfig => {
+  return {
+    ...data,
+    id: data.id,
+    name: data.name,
+    lastModified: new Date(data.lastModified),
+    widgets: data.widgets.map(widget => ({
+      ...widget,
+      id: widget.id,
+      type: widget.type, // This will be 'kpi' or 'chart', which is compatible with WidgetType
+      title: widget.title,
+      sourceData: widget.sourceData || '',
+      size: widget.size,
+      position: widget.position,
+      config: widget.config || {} // Ensure config is always defined
+    }))
+  };
+};
+
+const convertToServiceDashboardConfig = (data: DashboardConfig): ServiceDashboardConfig => {
+  return {
+    ...data,
+    id: data.id,
+    name: data.name,
+    lastModified: data.lastModified,
+    widgets: data.widgets.map(widget => {
+      // Ensure only supported widget types are sent to the service
+      const type: ServiceWidgetType = widget.type === 'table' ? 'chart' : widget.type;
+      
+      return {
+        ...widget,
+        id: widget.id,
+        type,
+        title: widget.title,
+        sourceData: widget.sourceData,
+        size: widget.size,
+        position: widget.position,
+        config: widget.config
+      };
+    })
+  };
+};
 
 /**
  * Custom hook for managing dashboard state and operations
@@ -23,23 +79,7 @@ export const useCustomDashboardController = (
       try {
         const dashboardData = await getDashboard(dashboardId);
         if (dashboardData) {
-          // Ensure the type is compatible by enforcing required fields
-          const typedDashboard: DashboardConfig = {
-            ...dashboardData,
-            id: dashboardData.id,
-            name: dashboardData.name,
-            lastModified: new Date(dashboardData.lastModified),
-            widgets: dashboardData.widgets.map(widget => ({
-              ...widget,
-              id: widget.id,
-              type: widget.type,
-              title: widget.title,
-              sourceData: widget.sourceData || '',
-              size: widget.size,
-              position: widget.position,
-              config: widget.config || {} // Ensure config is always defined
-            }))
-          };
+          const typedDashboard = convertToDashboardConfig(dashboardData);
           setDashboard(typedDashboard);
           setNewTitle(typedDashboard.name);
         }
@@ -61,24 +101,16 @@ export const useCustomDashboardController = (
     if (!dashboard) return;
 
     try {
-      const updatedDashboard = {
+      const updatedDashboard: DashboardConfig = {
         ...dashboard,
         name: newTitle,
         lastModified: new Date()
       };
       
-      await saveDashboard(updatedDashboard);
+      await saveDashboard(convertToServiceDashboardConfig(updatedDashboard));
       
-      // Update the local state with a properly typed object
-      const typedDashboard: DashboardConfig = {
-        ...updatedDashboard,
-        widgets: updatedDashboard.widgets.map(widget => ({
-          ...widget,
-          config: widget.config || {} // Ensure config is always defined
-        }))
-      };
-      
-      setDashboard(typedDashboard);
+      // Update the local state
+      setDashboard(updatedDashboard);
       setIsEditing(false);
       toast.success('Tableau de bord enregistré');
     } catch (error) {
@@ -125,7 +157,7 @@ export const useCustomDashboardController = (
     
     const newWidget: WidgetConfig = {
       id: `widget-${Date.now()}`,
-      type: widgetType as 'kpi' | 'chart', 
+      type: widgetType as 'kpi' | 'chart' | 'table', 
       title: widgetType === 'kpi' ? 'Nouvel indicateur' : 'Nouveau graphique',
       sourceData: '',
       size: [1, 1],
@@ -219,15 +251,10 @@ export const useCustomDashboardController = (
     };
     
     try {
-      await saveDashboard(newDashboard);
+      await saveDashboard(convertToServiceDashboardConfig(newDashboard));
       
       // Update the local state with a properly typed object
-      const typedDashboard: DashboardConfig = {
-        ...newDashboard,
-        widgets: [] // Empty widgets array, all correctly typed
-      };
-      
-      setDashboard(typedDashboard);
+      setDashboard(newDashboard);
       toast.success('Nouveau tableau de bord créé');
     } catch (error) {
       console.error('Error creating dashboard:', error);

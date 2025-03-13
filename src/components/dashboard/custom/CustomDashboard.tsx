@@ -11,6 +11,7 @@ import EditWidgetDialog from './EditWidgetDialog';
 import { useCustomDashboardController } from '@/controllers/CustomDashboardController';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { WidgetConfig } from '@/models/dashboard';
 
 interface CustomDashboardProps {
   dashboardId: string;

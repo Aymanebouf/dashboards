@@ -4,7 +4,7 @@ import { Card } from 'primereact/card';
 import { WidgetType } from '@/models/dashboard';
 
 interface WidgetPickerProps {
-  onAddWidget: (type: WidgetType) => void;
+  onAddWidget: (type: WidgetType | string) => void;
 }
 
 const WidgetPicker: React.FC<WidgetPickerProps> = ({ onAddWidget }) => {

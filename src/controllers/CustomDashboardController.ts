@@ -1,17 +1,18 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { 
   WidgetConfig, 
+  Dashboard,
   DashboardConfig, 
   ServiceDashboardConfig,
   ServiceWidgetConfig,
-  ServiceWidgetType
+  ServiceWidgetType,
+  WidgetType
 } from '@/models/dashboard';
 import { 
-  getDashboard, 
-  saveDashboard, 
-  deleteDashboard 
+  getDashboard as getServiceDashboard, 
+  saveDashboard as saveServiceDashboard, 
+  deleteDashboard as deleteServiceDashboard
 } from '@/services/dashboardService';
 
 /**
@@ -26,12 +27,12 @@ const convertToDashboardConfig = (data: ServiceDashboardConfig): DashboardConfig
     widgets: data.widgets.map(widget => ({
       ...widget,
       id: widget.id,
-      type: widget.type, // This will be 'kpi' or 'chart', which is compatible with WidgetType
+      type: widget.type as WidgetType,
       title: widget.title,
       sourceData: widget.sourceData || '',
       size: widget.size,
       position: widget.position,
-      config: widget.config || {} // Ensure config is always defined
+      config: widget.config || {}
     }))
   };
 };
@@ -43,8 +44,7 @@ const convertToServiceDashboardConfig = (data: DashboardConfig): ServiceDashboar
     name: data.name,
     lastModified: data.lastModified,
     widgets: data.widgets.map(widget => {
-      // Ensure only supported widget types are sent to the service
-      const type: ServiceWidgetType = widget.type === 'table' ? 'chart' : widget.type;
+      const type: ServiceWidgetType = widget.type === 'table' ? 'chart' : widget.type as ServiceWidgetType;
       
       return {
         ...widget,
@@ -55,7 +55,7 @@ const convertToServiceDashboardConfig = (data: DashboardConfig): ServiceDashboar
         size: widget.size,
         position: widget.position,
         config: widget.config
-      };
+      } as ServiceWidgetConfig;
     })
   };
 };
@@ -77,7 +77,7 @@ export const useCustomDashboardController = (
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const dashboardData = await getDashboard(dashboardId);
+        const dashboardData = await getServiceDashboard(dashboardId);
         if (dashboardData) {
           const typedDashboard = convertToDashboardConfig(dashboardData);
           setDashboard(typedDashboard);
@@ -107,7 +107,7 @@ export const useCustomDashboardController = (
         lastModified: new Date()
       };
       
-      await saveDashboard(convertToServiceDashboardConfig(updatedDashboard));
+      await saveServiceDashboard(convertToServiceDashboardConfig(updatedDashboard));
       
       // Update the local state
       setDashboard(updatedDashboard);
@@ -157,7 +157,7 @@ export const useCustomDashboardController = (
     
     const newWidget: WidgetConfig = {
       id: `widget-${Date.now()}`,
-      type: widgetType as 'kpi' | 'chart' | 'table', 
+      type: widgetType as WidgetType,
       title: widgetType === 'kpi' ? 'Nouvel indicateur' : 'Nouveau graphique',
       sourceData: '',
       size: [1, 1],
@@ -227,7 +227,7 @@ export const useCustomDashboardController = (
     
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce tableau de bord ?')) {
       try {
-        await deleteDashboard(dashboard.id);
+        await deleteServiceDashboard(dashboard.id);
         toast.success('Tableau de bord supprimé');
         if (onDeleteDashboard) {
           onDeleteDashboard(dashboard.id);
@@ -251,7 +251,7 @@ export const useCustomDashboardController = (
     };
     
     try {
-      await saveDashboard(convertToServiceDashboardConfig(newDashboard));
+      await saveServiceDashboard(convertToServiceDashboardConfig(newDashboard));
       
       // Update the local state with a properly typed object
       setDashboard(newDashboard);

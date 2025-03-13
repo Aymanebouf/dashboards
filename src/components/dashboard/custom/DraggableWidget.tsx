@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowDown, ArrowUp, GripVertical, Settings, X, Maximize2, ChevronUp, ChevronDown } from 'lucide-react';
 import ChartWidget from '@/components/dashboard/widgets/ChartWidget';
-import { WidgetConfig } from '@/services/dashboardService';
+import { WidgetConfig } from '@/models/dashboard';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 

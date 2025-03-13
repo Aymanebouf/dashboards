@@ -7,7 +7,7 @@ import KPICardGrid from './widgets/KPICardGrid';
 import ChartGrid from './widgets/ChartGrid';
 import AIAnalysisSection from './AIAnalysisSection';
 import CustomDashboard from './custom/CustomDashboard';
-import DashboardSelector from './custom/DashboardSelector';
+import DashboardSelector from './widgets/DashboardSelector';
 import useCustomDashboards from '@/hooks/useCustomDashboards';
 import { getDashboards } from '@/services/dashboardService';
 
@@ -58,21 +58,21 @@ const DashboardContent = ({
       <TabPanel header="Analytique">
         <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
           <Card.Header>
-            <Card.Title>Activité des engins</Card.Title>
+            <Card.Title>Mouvements des stocks par semaine</Card.Title>
           </Card.Header>
           <Card.Body>
             <ChartWidget
               title=""
               data={[
-                { name: 'Jan', 'En activité': 45, 'En pause': 25, 'En maintenance': 15 },
-                { name: 'Fév', 'En activité': 50, 'En pause': 20, 'En maintenance': 12 },
-                { name: 'Mar', 'En activité': 55, 'En pause': 22, 'En maintenance': 10 },
-                { name: 'Avr', 'En activité': 60, 'En pause': 18, 'En maintenance': 8 },
-                { name: 'Mai', 'En activité': 65, 'En pause': 15, 'En maintenance': 7 },
-                { name: 'Juin', 'En activité': 70, 'En pause': 10, 'En maintenance': 6 },
+                { name: 'Semaine 1', 'Entrées': 1250, 'Sorties': 1180, 'Stock inactif': 320 },
+                { name: 'Semaine 2', 'Entrées': 1350, 'Sorties': 1220, 'Stock inactif': 340 },
+                { name: 'Semaine 3', 'Entrées': 1420, 'Sorties': 1350, 'Stock inactif': 310 },
+                { name: 'Semaine 4', 'Entrées': 1380, 'Sorties': 1420, 'Stock inactif': 290 },
+                { name: 'Semaine 5', 'Entrées': 1520, 'Sorties': 1380, 'Stock inactif': 275 },
+                { name: 'Semaine 6', 'Entrées': 1450, 'Sorties': 1480, 'Stock inactif': 250 },
               ]}
               type="area"
-              colors={['#4CAF50', '#FFC107', '#F44336']}
+              colors={['#4CAF50', '#F44336', '#FF9800']}
               height={400}
             />
           </Card.Body>

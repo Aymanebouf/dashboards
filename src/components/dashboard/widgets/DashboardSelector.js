@@ -12,10 +12,10 @@ const DashboardSelector = ({
   const menuRef = React.useRef(null);
 
   const dashboards = [
+    { id: 'analyse-stocks', label: 'Analyse des stocks et mouvements', icon: 'pi pi-box' },
     { id: 'duree-presence', label: 'Durée de présence des engins', icon: 'pi pi-clock' },
     { id: 'classement-clients', label: 'Classement des clients', icon: 'pi pi-users' },
     { id: 'utilisation-engins', label: 'Suivi de l\'utilisation des engins', icon: 'pi pi-truck' },
-    { id: 'analyse-stocks', label: 'Analyse des stocks et mouvements', icon: 'pi pi-box' },
     { id: 'frequence-visite', label: 'Fréquence de visite chez un client', icon: 'pi pi-calendar' }
   ];
 

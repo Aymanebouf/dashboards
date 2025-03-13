@@ -154,36 +154,64 @@ export const useDashboardData = (selectedDashboard: string) => {
         break;
       
       case 'analyse-stocks':
-        dashboardData.title = 'Analyse des stocks et mouvements';
+        dashboardData.title = 'Analyse des stocks et mouvements dans les dépôts';
         dashboardData.kpiCards = [
-          { title: 'Stock total', value: '3,845 unités', trend: '+3.2%', description: 'Nombre total d\'unités en stock' },
-          { title: 'Entrées hebdo', value: '524 unités', trend: '+8.5%', description: 'Entrées moyennes par semaine' },
-          { title: 'Sorties hebdo', value: '489 unités', trend: '+6.3%', description: 'Sorties moyennes par semaine' },
-          { title: 'Temps moyen', value: '14.2 jours', trend: '-5.1%', description: 'Temps moyen en stock avant expédition' }
+          { title: 'Produits entrants (mois)', value: '3,845 unités', trend: '+3.2%', description: 'Nombre total d\'unités entrées ce mois' },
+          { title: 'Produits sortants (mois)', value: '3,610 unités', trend: '+5.7%', description: 'Nombre total d\'unités expédiées ce mois' },
+          { title: 'Temps moyen stockage', value: '14.2 jours', trend: '-5.1%', description: 'Temps moyen en stock avant expédition' },
+          { title: 'Produits inactifs', value: '247 unités', trend: '+12.8%', description: 'Produits sans mouvement depuis 30+ jours' }
         ];
         dashboardData.charts = [
           { 
-            title: 'Mouvements hebdomadaires des stocks', 
+            title: 'Mouvements quotidiens des stocks (7 derniers jours)', 
             type: 'bar',
             data: [
-              { name: 'Semaine 1', 'Entrées': 510, 'Sorties': 480 },
-              { name: 'Semaine 2', 'Entrées': 520, 'Sorties': 490 },
-              { name: 'Semaine 3', 'Entrées': 530, 'Sorties': 495 },
-              { name: 'Semaine 4', 'Entrées': 540, 'Sorties': 500 }
+              { name: 'Lundi', 'Entrées': 510, 'Sorties': 480 },
+              { name: 'Mardi', 'Entrées': 520, 'Sorties': 490 },
+              { name: 'Mercredi', 'Entrées': 530, 'Sorties': 495 },
+              { name: 'Jeudi', 'Entrées': 540, 'Sorties': 500 },
+              { name: 'Vendredi', 'Entrées': 560, 'Sorties': 510 },
+              { name: 'Samedi', 'Entrées': 420, 'Sorties': 380 },
+              { name: 'Dimanche', 'Entrées': 320, 'Sorties': 290 }
             ],
             colors: ['#4CAF50', '#F44336']
           },
           {
-            title: 'Temps de stockage par catégorie (jours)',
-            type: 'area',
+            title: 'Évolution du temps de stockage par catégorie (jours)',
+            type: 'line',
             data: [
-              { name: 'Jan', 'Équipements': 16, 'Pièces détachées': 12, 'Consommables': 7 },
-              { name: 'Fév', 'Équipements': 15.5, 'Pièces détachées': 11.5, 'Consommables': 6.5 },
-              { name: 'Mar', 'Équipements': 15, 'Pièces détachées': 11, 'Consommables': 6 },
-              { name: 'Avr', 'Équipements': 14.5, 'Pièces détachées': 10.5, 'Consommables': 5.5 },
-              { name: 'Mai', 'Équipements': 14, 'Pièces détachées': 10, 'Consommables': 5 }
+              { name: 'Jan', 'Matières premières': 16, 'Produits finis': 12, 'Consommables': 7 },
+              { name: 'Fév', 'Matières premières': 15.5, 'Produits finis': 11.5, 'Consommables': 6.5 },
+              { name: 'Mar', 'Matières premières': 15, 'Produits finis': 11, 'Consommables': 6 },
+              { name: 'Avr', 'Matières premières': 14.5, 'Produits finis': 10.5, 'Consommables': 5.5 },
+              { name: 'Mai', 'Matières premières': 14, 'Produits finis': 10, 'Consommables': 5 },
+              { name: 'Juin', 'Matières premières': 14.2, 'Produits finis': 10.2, 'Consommables': 5.2 }
             ],
             colors: ['#9C27B0', '#FF9800', '#03A9F4']
+          },
+          {
+            title: 'Produits inactifs par dépôt',
+            type: 'bar',
+            data: [
+              { name: 'Dépôt A', 'Produits inactifs': 85 },
+              { name: 'Dépôt B', 'Produits inactifs': 62 },
+              { name: 'Dépôt C', 'Produits inactifs': 47 },
+              { name: 'Dépôt D', 'Produits inactifs': 32 },
+              { name: 'Dépôt E', 'Produits inactifs': 21 }
+            ],
+            colors: ['#E91E63']
+          },
+          {
+            title: 'Répartition des temps de stockage',
+            type: 'pie',
+            data: [
+              { name: '< 7 jours', value: 45 },
+              { name: '7-14 jours', value: 30 },
+              { name: '15-30 jours', value: 15 },
+              { name: '31-60 jours', value: 7 },
+              { name: '> 60 jours', value: 3 }
+            ],
+            colors: ['#4CAF50', '#8BC34A', '#FFC107', '#FF9800', '#F44336']
           }
         ];
         break;
@@ -226,38 +254,40 @@ export const useDashboardData = (selectedDashboard: string) => {
         break;
         
       default:
-        dashboardData.title = 'Tableau de bord général';
+        dashboardData.title = 'Analyse des stocks et mouvements dans les dépôts';
         dashboardData.kpiCards = [
-          { title: 'Total Engins', value: '2,845', trend: '+12.5%', description: 'Nombre total d\'engins' },
-          { title: 'Activations', value: '1,257', trend: '+5.2%', description: 'Nombre d\'activations' },
-          { title: 'Production', value: '1,560t', trend: '+8.3%', description: 'Tonnes produites' },
-          { title: 'Heures totales', value: '12,450h', trend: '+3.2%', description: 'Heures d\'opération' }
+          { title: 'Produits entrants (mois)', value: '3,845 unités', trend: '+3.2%', description: 'Nombre total d\'unités entrées ce mois' },
+          { title: 'Produits sortants (mois)', value: '3,610 unités', trend: '+5.7%', description: 'Nombre total d\'unités expédiées ce mois' },
+          { title: 'Temps moyen stockage', value: '14.2 jours', trend: '-5.1%', description: 'Temps moyen en stock avant expédition' },
+          { title: 'Produits inactifs', value: '247 unités', trend: '+12.8%', description: 'Produits sans mouvement depuis 30+ jours' }
         ];
         dashboardData.charts = [
           { 
-            title: 'Performance mensuelle', 
-            type: 'line',
+            title: 'Mouvements quotidiens des stocks (7 derniers jours)', 
+            type: 'bar',
             data: [
-              { name: 'Jan', value: 45 },
-              { name: 'Fév', value: 52 },
-              { name: 'Mar', value: 49 },
-              { name: 'Avr', value: 63 },
-              { name: 'Mai', value: 58 },
-              { name: 'Juin', value: 64 }
+              { name: 'Lundi', 'Entrées': 510, 'Sorties': 480 },
+              { name: 'Mardi', 'Entrées': 520, 'Sorties': 490 },
+              { name: 'Mercredi', 'Entrées': 530, 'Sorties': 495 },
+              { name: 'Jeudi', 'Entrées': 540, 'Sorties': 500 },
+              { name: 'Vendredi', 'Entrées': 560, 'Sorties': 510 },
+              { name: 'Samedi', 'Entrées': 420, 'Sorties': 380 },
+              { name: 'Dimanche', 'Entrées': 320, 'Sorties': 290 }
             ],
-            colors: ['#1E88E5']
+            colors: ['#4CAF50', '#F44336']
           },
           {
-            title: 'Répartition par type d\'engin',
-            type: 'pie',
+            title: 'Évolution du temps de stockage par catégorie (jours)',
+            type: 'line',
             data: [
-              { name: 'Bulldozer', value: 35 },
-              { name: 'Grue', value: 25 },
-              { name: 'Excavateur', value: 20 },
-              { name: 'Chariot élévateur', value: 15 },
-              { name: 'Autre', value: 5 }
+              { name: 'Jan', 'Matières premières': 16, 'Produits finis': 12, 'Consommables': 7 },
+              { name: 'Fév', 'Matières premières': 15.5, 'Produits finis': 11.5, 'Consommables': 6.5 },
+              { name: 'Mar', 'Matières premières': 15, 'Produits finis': 11, 'Consommables': 6 },
+              { name: 'Avr', 'Matières premières': 14.5, 'Produits finis': 10.5, 'Consommables': 5.5 },
+              { name: 'Mai', 'Matières premières': 14, 'Produits finis': 10, 'Consommables': 5 },
+              { name: 'Juin', 'Matières premières': 14.2, 'Produits finis': 10.2, 'Consommables': 5.2 }
             ],
-            colors: ['#4CAF50', '#FFC107', '#F44336', '#9C27B0', '#673AB7']
+            colors: ['#9C27B0', '#FF9800', '#03A9F4']
           }
         ];
     }

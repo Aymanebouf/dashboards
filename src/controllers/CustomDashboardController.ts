@@ -34,7 +34,7 @@ export const useCustomDashboardController = (
               id: widget.id,
               type: widget.type,
               title: widget.title,
-              sourceData: widget.sourceData,
+              sourceData: widget.sourceData || '',
               size: widget.size,
               position: widget.position,
               config: widget.config || {} // Ensure config is always defined

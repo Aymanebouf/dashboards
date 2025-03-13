@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { 
   Dialog, 
@@ -18,9 +17,9 @@ import {
   SelectTrigger, 
   SelectValue
 } from '@/components/ui/select';
-import { WidgetConfig } from '@/services/dashboardService';
+import { WidgetConfig } from '@/models/dashboard';
 import { Badge } from '@/components/ui/badge';
-import { ChartType } from '@/models/chart';
+import { ChartType } from '@/models/dashboard';
 import { Settings, PieChart, BarChart2, LineChart, Activity } from 'lucide-react';
 
 interface EditWidgetDialogProps {

@@ -11,8 +11,6 @@ import "primeflex/primeflex.css";                                    // primefle
 
 // Toast providers
 import { Toast } from 'primereact/toast';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 
 // Hooks
 import { ThemeProvider } from "@/hooks/use-theme";
@@ -29,8 +27,6 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <PrimeReactProvider>
       <ThemeProvider defaultTheme="light">
-        <Toaster />
-        <Sonner />
         <Toast position="top-right" />
         <BrowserRouter>
           <Routes>

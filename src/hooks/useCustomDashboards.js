@@ -27,7 +27,7 @@ const useCustomDashboards = () => {
     };
     
     loadDashboards();
-  }, []);
+  }, [selectedDashboardId]);
 
   const refreshDashboards = () => {
     const refreshedDashboards = getDashboards();

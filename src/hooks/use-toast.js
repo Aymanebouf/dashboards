@@ -1,47 +1,39 @@
 
 import { useRef } from 'react';
-import { useToast as usePrimeToast } from 'primereact/toast';
 
 export const useToast = () => {
   const toast = useRef(null);
-  
-  const showToast = (options) => {
-    if (toast.current) {
-      const { title, description, variant = 'default' } = options;
-      
-      const severity = variant === 'destructive' ? 'error' : 'info';
-      
-      toast.current.show({
-        severity,
-        summary: title,
-        detail: description,
-        life: 3000
-      });
-    }
+
+  const showToast = (severity, summary, detail, life = 3000) => {
+    toast.current?.show({ severity, summary, detail, life });
   };
-  
+
   return {
     toast,
-    toasts: [],
-    showToast
+    showSuccess: (summary, detail, life) => showToast('success', summary, detail, life),
+    showInfo: (summary, detail, life) => showToast('info', summary, detail, life),
+    showWarn: (summary, detail, life) => showToast('warn', summary, detail, life),
+    showError: (summary, detail, life) => showToast('error', summary, detail, life)
   };
 };
 
-export const toast = {
-  info: (options) => {
-    return {
-      id: Date.now(),
-      title: options.title,
-      description: options.description,
-      variant: 'default'
-    };
+const toast = {
+  success: (summary, detail, life = 3000) => {
+    const toastInstance = window.PrimeReact?.toast;
+    toastInstance?.show({ severity: 'success', summary, detail, life });
   },
-  error: (options) => {
-    return {
-      id: Date.now(),
-      title: options.title,
-      description: options.description,
-      variant: 'destructive'
-    };
+  info: (summary, detail, life = 3000) => {
+    const toastInstance = window.PrimeReact?.toast;
+    toastInstance?.show({ severity: 'info', summary, detail, life });
+  },
+  warn: (summary, detail, life = 3000) => {
+    const toastInstance = window.PrimeReact?.toast;
+    toastInstance?.show({ severity: 'warn', summary, detail, life });
+  },
+  error: (summary, detail, life = 3000) => {
+    const toastInstance = window.PrimeReact?.toast;
+    toastInstance?.show({ severity: 'error', summary, detail, life });
   }
 };
+
+export { toast };

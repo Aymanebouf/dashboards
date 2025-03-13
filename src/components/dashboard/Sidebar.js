@@ -3,7 +3,6 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { classNames } from 'primereact/utils';
 import { Tooltip } from 'primereact/tooltip';
-import { PanelMenu } from 'primereact/panelmenu';
 import Logo from '../Logo';
 
 const NavItem = ({ 
@@ -19,16 +18,16 @@ const NavItem = ({
   const itemContent = (
     <div 
       className={classNames(
-        "flex align-items-center px-3 py-2 border-round-lg transition-all duration-200",
+        "flex items-center px-3 py-2 rounded-lg transition-all duration-200 group",
         isActive 
-          ? "bg-primary text-white" 
-          : "text-color hover:surface-ground",
+          ? "bg-logitag-primary text-white" 
+          : "text-sidebar-foreground hover:bg-sidebar-accent",
         className
       )}
       onClick={onClick}
     >
-      <div className="w-2rem h-2rem flex align-items-center justify-content-center">
-        <i className={icon}></i>
+      <div className="w-6 h-6 flex items-center justify-center">
+        {icon}
       </div>
       {expanded && (
         <span className="ml-3 text-sm font-medium">
@@ -37,7 +36,7 @@ const NavItem = ({
       )}
       {hasSubmenu && expanded && (
         <span className="ml-auto">
-          <i className="pi pi-chevron-right"></i>
+          <i className="pi pi-chevron-right" style={{ fontSize: '0.75rem' }}></i>
         </span>
       )}
     </div>
@@ -45,12 +44,12 @@ const NavItem = ({
 
   if (!expanded) {
     return (
-      <>
-        <Tooltip target={`.nav-link-${label.replace(/\s+/g, '-').toLowerCase()}`} position="right" />
-        <Link to={to} className={`nav-link-${label.replace(/\s+/g, '-').toLowerCase()} block`} data-pr-tooltip={label}>
+      <div className="sidebar-tooltip-wrapper">
+        <Link to={to} className="block">
           {itemContent}
         </Link>
-      </>
+        <Tooltip target=".sidebar-tooltip-wrapper" content={label} position="right" />
+      </div>
     );
   }
 
@@ -68,120 +67,12 @@ const Sidebar = ({
   const location = useLocation();
   const path = location.pathname;
 
-  const menuItems = [
-    {
-      icon: "pi pi-th-large",
-      label: "Dashboard",
-      to: "/",
-      isActive: path === '/'
-    },
-    {
-      icon: "pi pi-bolt",
-      label: "IA & Prédictions",
-      to: "/ai-predictions",
-      isActive: path === '/ai-predictions',
-      className: "bg-purple-50 text-purple-700 hover:bg-purple-100"
-    },
-    {
-      icon: "pi pi-list",
-      label: "Résumé",
-      to: "/resume",
-      isActive: path === '/resume'
-    },
-    {
-      icon: "pi pi-chart-bar",
-      label: "Infos engins",
-      to: "/infos-engins",
-      isActive: path === '/infos-engins'
-    },
-    {
-      icon: "pi pi-box",
-      label: "Engins",
-      to: "/engins",
-      isActive: path === '/engins'
-    },
-    {
-      icon: "pi pi-tag",
-      label: "Tags",
-      to: "/tags",
-      isActive: path === '/tags'
-    },
-    {
-      icon: "pi pi-calendar",
-      label: "Calendrier",
-      to: "/calendrier",
-      isActive: path === '/calendrier'
-    },
-    {
-      icon: "pi pi-map-marker",
-      label: "Map",
-      to: "/map",
-      isActive: path === '/map'
-    },
-    {
-      icon: "pi pi-map-marker",
-      label: "Places",
-      to: "/places",
-      isActive: path === '/places',
-      hasSubmenu: true
-    },
-    {
-      icon: "pi pi-box",
-      label: "Inventory",
-      to: "/inventory",
-      isActive: path === '/inventory'
-    },
-    {
-      icon: "pi pi-users",
-      label: "Utilisateurs",
-      to: "/utilisateurs",
-      isActive: path === '/utilisateurs'
-    },
-    {
-      icon: "pi pi-cog",
-      label: "Paramètres",
-      to: "/parametres",
-      isActive: path === '/parametres',
-      hasSubmenu: true
-    },
-    {
-      icon: "pi pi-file",
-      label: "Rapports",
-      to: "/rapports",
-      isActive: path === '/rapports'
-    },
-    {
-      icon: "pi pi-list",
-      label: "LOGS",
-      to: "/logs",
-      isActive: path === '/logs'
-    },
-    {
-      icon: "pi pi-database",
-      label: "Insertion des données",
-      to: "/insertion-donnees",
-      isActive: path === '/insertion-donnees'
-    },
-    {
-      icon: "pi pi-wifi",
-      label: "GATEWAY",
-      to: "/gateway",
-      isActive: path === '/gateway'
-    },
-    {
-      icon: "pi pi-file",
-      label: "Rapports de présence",
-      to: "/rapports-presence",
-      isActive: path === '/rapports-presence'
-    }
-  ];
-
   return (
     <div className={classNames(
-      "h-screen flex flex-column border-right-1 bg-surface fixed left-0 top-0 z-5 transition-all duration-300",
+      "h-screen flex flex-col border-r border-border bg-sidebar fixed left-0 top-0 z-30 transition-all duration-300",
       expanded ? "w-64" : "w-16"
     )}>
-      <div className="p-3 flex align-items-center justify-content-center">
+      <div className="p-4 flex items-center">
         {expanded ? (
           <Logo className="mx-auto" />
         ) : (
@@ -189,39 +80,139 @@ const Sidebar = ({
         )}
       </div>
       
-      <div className="mt-3 px-2 overflow-y-auto flex-grow-1">
-        {expanded ? (
-          menuItems.map((item, index) => (
-            <NavItem 
-              key={index}
-              to={item.to} 
-              icon={item.icon} 
-              label={item.label} 
-              isActive={item.isActive} 
-              expanded={expanded}
-              hasSubmenu={item.hasSubmenu}
-              className={item.className}
-            />
-          ))
-        ) : (
-          menuItems.map((item, index) => (
-            <NavItem 
-              key={index}
-              to={item.to} 
-              icon={item.icon} 
-              label={item.label} 
-              isActive={item.isActive} 
-              expanded={expanded}
-              hasSubmenu={item.hasSubmenu}
-              className={item.className}
-            />
-          ))
-        )}
+      <div className="mt-6 px-3 overflow-y-auto flex-grow">
+        <NavItem 
+          to="/" 
+          icon={<i className="pi pi-home" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Dashboard" 
+          isActive={path === '/'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/ai-predictions" 
+          icon={<i className="pi pi-cog" style={{ fontSize: '1.125rem' }}></i>} 
+          label="IA & Prédictions" 
+          isActive={path === '/ai-predictions'} 
+          expanded={expanded}
+          className="bg-purple-50 text-purple-700 hover:bg-purple-100"
+        />
+        <NavItem 
+          to="/resume" 
+          icon={<i className="pi pi-file" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Résumé" 
+          isActive={path === '/resume'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/infos-engins" 
+          icon={<i className="pi pi-chart-bar" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Infos engins" 
+          isActive={path === '/infos-engins'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/engins" 
+          icon={<i className="pi pi-truck" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Engins" 
+          isActive={path === '/engins'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/tags" 
+          icon={<i className="pi pi-tag" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Tags" 
+          isActive={path === '/tags'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/calendrier" 
+          icon={<i className="pi pi-calendar" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Calendrier" 
+          isActive={path === '/calendrier'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/map" 
+          icon={<i className="pi pi-map-marker" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Map" 
+          isActive={path === '/map'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/places" 
+          icon={<i className="pi pi-map-marker" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Places" 
+          isActive={path === '/places'} 
+          expanded={expanded}
+          hasSubmenu={true}
+        />
+        <NavItem 
+          to="/inventory" 
+          icon={<i className="pi pi-box" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Inventory" 
+          isActive={path === '/inventory'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/utilisateurs" 
+          icon={<i className="pi pi-users" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Utilisateurs" 
+          isActive={path === '/utilisateurs'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/parametres" 
+          icon={<i className="pi pi-cog" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Paramètres" 
+          isActive={path === '/parametres'} 
+          expanded={expanded}
+          hasSubmenu={true}
+        />
+        <NavItem 
+          to="/rapports" 
+          icon={<i className="pi pi-file-pdf" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Rapports" 
+          isActive={path === '/rapports'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/logs" 
+          icon={<i className="pi pi-list" style={{ fontSize: '1.125rem' }}></i>} 
+          label="LOGS" 
+          isActive={path === '/logs'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/insertion-donnees" 
+          icon={<i className="pi pi-database" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Insertion des données" 
+          isActive={path === '/insertion-donnees'} 
+          expanded={expanded}
+        />
+        
+        <div className="pt-4 pb-2 px-3">
+          <div className="h-px bg-border my-2"></div>
+        </div>
+        
+        <NavItem 
+          to="/gateway" 
+          icon={<i className="pi pi-wifi" style={{ fontSize: '1.125rem' }}></i>} 
+          label="GATEWAY" 
+          isActive={path === '/gateway'} 
+          expanded={expanded}
+        />
+        <NavItem 
+          to="/rapports-presence" 
+          icon={<i className="pi pi-file-pdf" style={{ fontSize: '1.125rem' }}></i>} 
+          label="Rapports de présence" 
+          isActive={path === '/rapports-presence'} 
+          expanded={expanded}
+        />
       </div>
       
-      <div className="p-3 border-top-1 text-xs text-color-secondary py-2">
+      <div className="p-3 border-t border-border text-xs text-muted-foreground py-2">
         {expanded && (
-          <div className="flex justify-content-between align-items-center">
+          <div className="flex justify-between items-center">
             <span>2023© omniyat | version 1.0.0</span>
           </div>
         )}

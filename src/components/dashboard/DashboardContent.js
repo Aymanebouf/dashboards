@@ -28,7 +28,7 @@ const DashboardContent = ({
 
   // Rafraîchir les dashboards lorsqu'on accède à l'onglet personnalisé
   useEffect(() => {
-    if (activeTab === 'personnalise') {
+    if (activeTab === 2) { // personnalise tab index
       refreshDashboards();
     }
   }, [activeTab, refreshDashboards]);
@@ -45,12 +45,7 @@ const DashboardContent = ({
   };
 
   return (
-    <TabView activeIndex={activeTab === 'principal' ? 0 : activeTab === 'analytique' ? 1 : activeTab === 'personnalise' ? 2 : 3}
-             onTabChange={(e) => {
-               const tabNames = ['principal', 'analytique', 'personnalise', 'ia-predictions'];
-               setActiveTab(tabNames[e.index]);
-             }} 
-             className="mb-4">
+    <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)} className="dashboard-tabs">
       <TabPanel header="Principal">
         {kpiData && (
           <>
@@ -62,8 +57,10 @@ const DashboardContent = ({
 
       <TabPanel header="Analytique">
         <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
-          <div className="p-card-title">Activité des engins</div>
-          <div className="p-card-content">
+          <Card.Header>
+            <Card.Title>Activité des engins</Card.Title>
+          </Card.Header>
+          <Card.Body>
             <ChartWidget
               title=""
               data={[
@@ -78,7 +75,7 @@ const DashboardContent = ({
               colors={['#4CAF50', '#FFC107', '#F44336']}
               height={400}
             />
-          </div>
+          </Card.Body>
         </Card>
       </TabPanel>
 
@@ -105,9 +102,9 @@ const DashboardContent = ({
             />
           ) : (
             <Card>
-              <div className="p-card-content py-8 text-center">
+              <Card.Body className="py-8 text-center">
                 <p>Aucun tableau de bord personnalisé disponible.</p>
-              </div>
+              </Card.Body>
             </Card>
           )
         )}

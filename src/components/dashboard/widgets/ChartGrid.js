@@ -20,13 +20,15 @@ const ChartGrid = ({ charts }) => {
             title: { className: 'text-lg font-medium' }
           }}
         >
-          <ChartWidget
-            title=""
-            data={chart.data}
-            type={chart.type}
-            colors={chart.colors}
-            height={320}
-          />
+          <div className="p-card-body">
+            <ChartWidget
+              title=""
+              data={chart.data}
+              type={chart.type}
+              colors={chart.colors}
+              height={320}
+            />
+          </div>
         </Card>
       ))}
     </div>

@@ -44,8 +44,29 @@ const DashboardContent = ({
     }
   };
 
+  // Ensure the activeIndex is using the proper type (a number, not a string)
+  const getActiveIndex = () => {
+    if (activeTab === 'principal') return 0;
+    if (activeTab === 'analytique') return 1;
+    if (activeTab === 'personnalise') return 2;
+    if (activeTab === 'ia') return 3;
+    return 0; // Default to principal tab
+  };
+
+  // Handle tab change from TabView
+  const handleTabChange = (e) => {
+    const index = e.index;
+    let tabName = 'principal';
+    
+    if (index === 1) tabName = 'analytique';
+    else if (index === 2) tabName = 'personnalise';
+    else if (index === 3) tabName = 'ia';
+    
+    setActiveTab(tabName);
+  };
+
   return (
-    <TabView activeIndex={activeTab} onTabChange={(e) => setActiveTab(e.index)} className="dashboard-tabs">
+    <TabView activeIndex={getActiveIndex()} onTabChange={handleTabChange} className="dashboard-tabs">
       <TabPanel header="Principal">
         {kpiData && (
           <>
@@ -57,10 +78,10 @@ const DashboardContent = ({
 
       <TabPanel header="Analytique">
         <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
-          <Card.Header>
-            <Card.Title>Mouvements des stocks par semaine</Card.Title>
-          </Card.Header>
-          <Card.Body>
+          <div className="p-card-header">
+            <div className="p-card-title">Mouvements des stocks par semaine</div>
+          </div>
+          <div className="p-card-body">
             <ChartWidget
               title=""
               data={[
@@ -75,7 +96,7 @@ const DashboardContent = ({
               colors={['#4CAF50', '#F44336', '#FF9800']}
               height={400}
             />
-          </Card.Body>
+          </div>
         </Card>
       </TabPanel>
 
@@ -102,9 +123,9 @@ const DashboardContent = ({
             />
           ) : (
             <Card>
-              <Card.Body className="py-8 text-center">
+              <div className="p-card-body py-8 text-center">
                 <p>Aucun tableau de bord personnalisé disponible.</p>
-              </Card.Body>
+              </div>
             </Card>
           )
         )}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from 'primereact/card';
 import ChartWidget from './ChartWidget';
@@ -15,22 +14,23 @@ const ChartGrid = ({ charts, externalDashboardUrl }) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {shouldReplaceFirstChart ? (
-        <ExternalDashboardEmbed 
-          url={externalDashboardUrl} 
-          title={firstChart.title} 
-        />
-      ) : null}
-
       {charts.map((chart, index) => {
-        // Skip the first chart if it's being replaced
+        // If it's the first chart and meets the replacement criteria, show the external dashboard
         if (index === 0 && shouldReplaceFirstChart) {
-          return null;
+          return (
+            <ExternalDashboardEmbed 
+              key={`external-${index}`}
+              url={externalDashboardUrl} 
+              title={chart.title} 
+              height="400px"
+            />
+          );
         }
         
+        // Otherwise, render the regular chart
         return (
           <Card 
-            key={index} 
+            key={`chart-${index}`} 
             className="shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden rounded-xl border-none"
             title={chart.title}
             pt={{

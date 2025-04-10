@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardContent from '@/components/dashboard/DashboardContent';
@@ -19,8 +19,17 @@ const Dashboard = () => {
     dashboardTitle,
     kpiData,
     handleDashboardChange,
-    externalDashboardUrl  // The external dashboard URL can be set in the controller
+    externalDashboardUrl
   } = useDashboardController();
+
+  // Log the dashboard setup for debugging
+  useEffect(() => {
+    console.log("Dashboard set up with:", {
+      selectedDashboard,
+      externalDashboardUrl,
+      hasKpiData: !!kpiData
+    });
+  }, [selectedDashboard, externalDashboardUrl, kpiData]);
 
   return (
     <DashboardLayout>

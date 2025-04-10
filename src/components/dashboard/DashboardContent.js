@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Card } from 'primereact/card';
@@ -17,7 +16,7 @@ const DashboardContent = ({
   kpiData,
   isAIConfigured,
   errorMessage,
-  externalDashboardUrl // New prop for external dashboard URL
+  externalDashboardUrl
 }) => {
   const { 
     dashboards, 
@@ -27,7 +26,15 @@ const DashboardContent = ({
     refreshDashboards
   } = useCustomDashboards();
 
-  // Rafraîchir les dashboards lorsqu'on accède à l'onglet personnalisé
+  useEffect(() => {
+    if (kpiData && externalDashboardUrl) {
+      console.log("DashboardContent received:", { 
+        externalDashboardUrl, 
+        "firstChartTitle": kpiData?.charts?.[0]?.title 
+      });
+    }
+  }, [kpiData, externalDashboardUrl]);
+
   useEffect(() => {
     if (activeTab === 2) { // personnalise tab index
       refreshDashboards();
@@ -37,7 +44,6 @@ const DashboardContent = ({
   const handleDeleteDashboard = (id) => {
     refreshDashboards();
     if (dashboards.length > 0) {
-      // Sélectionner le premier tableau de bord disponible
       const availableDashboards = getDashboards();
       if (availableDashboards.length > 0) {
         setSelectedDashboardId(availableDashboards[0].id);
@@ -45,7 +51,6 @@ const DashboardContent = ({
     }
   };
 
-  // Ensure the activeIndex is using the proper type (a number, not a string)
   const getActiveIndex = () => {
     if (activeTab === 'principal') return 0;
     if (activeTab === 'analytique') return 1;
@@ -54,7 +59,6 @@ const DashboardContent = ({
     return 0; // Default to principal tab
   };
 
-  // Handle tab change from TabView
   const handleTabChange = (e) => {
     const index = e.index;
     let tabName = 'principal';

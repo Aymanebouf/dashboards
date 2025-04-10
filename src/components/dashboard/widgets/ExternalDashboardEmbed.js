@@ -14,6 +14,8 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
     return () => clearTimeout(timer);
   }, [url]);
 
+  console.log("Rendering external dashboard with URL:", url);
+
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
       <div className="p-card-header">
@@ -26,7 +28,7 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
             <span>Chargement du dashboard externe...</span>
           </div>
         )}
-        <div className={`iframe-container ${isLoading ? 'hidden' : 'block'}`}>
+        <div className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
           <iframe
             src={url}
             title={title}

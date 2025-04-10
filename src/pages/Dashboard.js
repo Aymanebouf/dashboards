@@ -24,10 +24,11 @@ const Dashboard = () => {
 
   // Log the dashboard setup for debugging
   useEffect(() => {
-    console.log("Dashboard set up with:", {
+    console.log("Dashboard page setup with:", {
       selectedDashboard,
       externalDashboardUrl,
-      hasKpiData: !!kpiData
+      hasKpiData: !!kpiData,
+      chartsCount: kpiData?.charts?.length || 0
     });
   }, [selectedDashboard, externalDashboardUrl, kpiData]);
 

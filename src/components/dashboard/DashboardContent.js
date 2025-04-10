@@ -29,12 +29,11 @@ const DashboardContent = ({
 
   // Log when we receive the props to ensure they're correctly passed
   useEffect(() => {
-    if (kpiData && externalDashboardUrl) {
-      console.log("DashboardContent received:", { 
-        externalDashboardUrl, 
-        "firstChartTitle": kpiData?.charts?.[0]?.title 
-      });
-    }
+    console.log("DashboardContent received props:", { 
+      externalDashboardUrl, 
+      "firstChartTitle": kpiData?.charts?.[0]?.title,
+      "chartsCount": kpiData?.charts?.length || 0
+    });
   }, [kpiData, externalDashboardUrl]);
 
   useEffect(() => {
@@ -78,7 +77,10 @@ const DashboardContent = ({
         {kpiData && (
           <>
             <KPICardGrid cards={kpiData.kpiCards} />
-            {/* Pass the external dashboard URL to ChartGrid */}
+            {/* Additional debugging for Grafana integration */}
+            {externalDashboardUrl && (
+              <div className="hidden">Grafana URL (debugging): {externalDashboardUrl}</div>
+            )}
             <ChartGrid 
               charts={kpiData.charts} 
               externalDashboardUrl={externalDashboardUrl} 

@@ -5,32 +5,42 @@ import ChartWidget from './ChartWidget';
 import ExternalDashboardEmbed from './ExternalDashboardEmbed';
 
 const ChartGrid = ({ charts, externalDashboardUrl }) => {
+  // Debug log for incoming props
+  useEffect(() => {
+    console.log('ChartGrid received props:', {
+      chartsCount: charts?.length,
+      externalDashboardUrl,
+      firstChartTitle: charts?.[0]?.title
+    });
+  }, [charts, externalDashboardUrl]);
+  
   if (!charts || charts.length === 0) {
     return null;
   }
 
-  // Check if we need to replace the first chart with an external dashboard
-  const firstChart = charts[0];
-  const shouldReplaceFirstChart = externalDashboardUrl && firstChart && firstChart.title === 'Durée moyenne de présence par type d\'engin';
+  // Finding the chart to replace (the first chart with the specific title)
+  const chartToReplaceIndex = charts.findIndex(chart => 
+    chart.title === 'Durée moyenne de présence par type d\'engin'
+  );
+  
+  const shouldReplaceChart = chartToReplaceIndex !== -1 && externalDashboardUrl;
 
-  // Debug log to verify we have what we need
-  useEffect(() => {
-    console.log('ChartGrid rendering with:', {
-      externalDashboardUrl,
-      shouldReplaceFirstChart,
-      firstChartTitle: firstChart?.title
-    });
-  }, [externalDashboardUrl, shouldReplaceFirstChart, firstChart]);
+  // Log the replacement decision
+  console.log('ChartGrid replacement decision:', {
+    chartToReplaceIndex,
+    shouldReplaceChart,
+    externalDashboardUrl
+  });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {charts.map((chart, index) => {
-        // If it's the first chart and meets the replacement criteria, show the external dashboard
-        if (index === 0 && shouldReplaceFirstChart) {
-          console.log("Rendering external dashboard instead of first chart");
+        // If this chart should be replaced with the external dashboard
+        if (shouldReplaceChart && index === chartToReplaceIndex) {
+          console.log(`Replacing chart at index ${index} with external dashboard`);
           return (
             <ExternalDashboardEmbed 
-              key={`external-${index}`}
+              key={`external-dashboard`}
               url={externalDashboardUrl} 
               title={chart.title} 
               height="400px"

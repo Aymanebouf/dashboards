@@ -14,16 +14,27 @@ export const useDashboardController = () => {
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   
-  // External dashboard URL for Grafana integration - Set this URL exactly as provided by the user
+  // External dashboard URL for Grafana integration
   const externalDashboardUrl = "https://c27c-41-250-193-127.ngrok-free.app/d-solo/deih76nv3i03ka/test?orgId=1&from=1744257925511&to=1744279525511&timezone=browser&panelId=1&__feature.dashboardSceneSolo";
   
   // Log the dashboard URL to verify it's correct
   useEffect(() => {
-    console.log("Dashboard Controller initialized with external URL:", externalDashboardUrl);
+    console.log("Dashboard Controller initialized with URL:", externalDashboardUrl);
+    // Force the dashboard to be "duree-presence" initially
+    setSelectedDashboard('duree-presence');
   }, []);
   
   // Get dashboard data from custom hook
   const { dashboardTitle, kpiData } = useDashboardData(selectedDashboard);
+
+  useEffect(() => {
+    console.log("Dashboard data updated:", {
+      dashboard: selectedDashboard,
+      title: dashboardTitle,
+      hasCharts: kpiData?.charts?.length > 0,
+      firstChartTitle: kpiData?.charts?.[0]?.title
+    });
+  }, [selectedDashboard, dashboardTitle, kpiData]);
 
   // Check AI configuration on initialization
   useEffect(() => {

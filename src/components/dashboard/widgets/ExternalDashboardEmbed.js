@@ -28,7 +28,14 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
             <span>Chargement du dashboard externe...</span>
           </div>
         )}
-        <div className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} style={{width: '100%', height: height}}>
+        <div className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} 
+          style={{
+            width: '100%', 
+            height: height,
+            position: 'relative', 
+            overflow: 'hidden'
+          }}
+        >
           <iframe
             src={url}
             title={title}
@@ -37,7 +44,14 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
             frameBorder="0"
             allowFullScreen
             onLoad={() => setIsLoading(false)}
-          ></iframe>
+            style={{
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              width: '100%', 
+              height: '100%'
+            }}
+          />
         </div>
       </div>
     </Card>

@@ -18,7 +18,8 @@ const Dashboard = () => {
     errorMessage,
     dashboardTitle,
     kpiData,
-    handleDashboardChange
+    handleDashboardChange,
+    externalDashboardUrl  // The external dashboard URL can be set in the controller
   } = useDashboardController();
 
   return (
@@ -36,6 +37,7 @@ const Dashboard = () => {
           kpiData={kpiData}
           isAIConfigured={isAIConfigured}
           errorMessage={errorMessage}
+          externalDashboardUrl={externalDashboardUrl}
         />
       </div>
     </DashboardLayout>

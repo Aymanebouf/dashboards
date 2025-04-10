@@ -16,7 +16,8 @@ const DashboardContent = ({
   setActiveTab, 
   kpiData,
   isAIConfigured,
-  errorMessage
+  errorMessage,
+  externalDashboardUrl // New prop for external dashboard URL
 }) => {
   const { 
     dashboards, 
@@ -71,7 +72,7 @@ const DashboardContent = ({
         {kpiData && (
           <>
             <KPICardGrid cards={kpiData.kpiCards} />
-            <ChartGrid charts={kpiData.charts} />
+            <ChartGrid charts={kpiData.charts} externalDashboardUrl={externalDashboardUrl} />
           </>
         )}
       </TabPanel>

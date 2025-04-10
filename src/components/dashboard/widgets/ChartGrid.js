@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Card } from 'primereact/card';
 import ChartWidget from './ChartWidget';
 import ExternalDashboardEmbed from './ExternalDashboardEmbed';
@@ -12,11 +13,21 @@ const ChartGrid = ({ charts, externalDashboardUrl }) => {
   const firstChart = charts[0];
   const shouldReplaceFirstChart = externalDashboardUrl && firstChart && firstChart.title === 'Durée moyenne de présence par type d\'engin';
 
+  // Debug log to verify we have what we need
+  useEffect(() => {
+    console.log('ChartGrid rendering with:', {
+      externalDashboardUrl,
+      shouldReplaceFirstChart,
+      firstChartTitle: firstChart?.title
+    });
+  }, [externalDashboardUrl, shouldReplaceFirstChart, firstChart]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {charts.map((chart, index) => {
         // If it's the first chart and meets the replacement criteria, show the external dashboard
         if (index === 0 && shouldReplaceFirstChart) {
+          console.log("Rendering external dashboard instead of first chart");
           return (
             <ExternalDashboardEmbed 
               key={`external-${index}`}

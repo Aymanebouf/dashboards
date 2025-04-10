@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Card } from 'primereact/card';
@@ -26,6 +27,7 @@ const DashboardContent = ({
     refreshDashboards
   } = useCustomDashboards();
 
+  // Log when we receive the props to ensure they're correctly passed
   useEffect(() => {
     if (kpiData && externalDashboardUrl) {
       console.log("DashboardContent received:", { 
@@ -76,7 +78,11 @@ const DashboardContent = ({
         {kpiData && (
           <>
             <KPICardGrid cards={kpiData.kpiCards} />
-            <ChartGrid charts={kpiData.charts} externalDashboardUrl={externalDashboardUrl} />
+            {/* Pass the external dashboard URL to ChartGrid */}
+            <ChartGrid 
+              charts={kpiData.charts} 
+              externalDashboardUrl={externalDashboardUrl} 
+            />
           </>
         )}
       </TabPanel>

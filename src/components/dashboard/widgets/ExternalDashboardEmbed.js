@@ -28,7 +28,7 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
             <span>Chargement du dashboard externe...</span>
           </div>
         )}
-        <div className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}>
+        <div className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} style={{width: '100%', height: height}}>
           <iframe
             src={url}
             title={title}

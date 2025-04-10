@@ -14,6 +14,9 @@ export const useDashboardController = () => {
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   
+  // External dashboard URL for Grafana integration
+  const externalDashboardUrl = "https://c27c-41-250-193-127.ngrok-free.app/d-solo/deih76nv3i03ka/test?orgId=1&from=1744257925511&to=1744279525511&timezone=browser&panelId=1&__feature.dashboardSceneSolo";
+  
   // Get dashboard data from custom hook
   const { dashboardTitle, kpiData } = useDashboardData(selectedDashboard);
 
@@ -57,6 +60,7 @@ export const useDashboardController = () => {
     errorMessage,
     dashboardTitle,
     kpiData,
-    handleDashboardChange
+    handleDashboardChange,
+    externalDashboardUrl
   };
 };

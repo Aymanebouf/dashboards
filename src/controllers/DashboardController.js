@@ -10,7 +10,7 @@ import useDashboardData from '@/hooks/useDashboardData';
  */
 export const useDashboardController = () => {
   const [activeTab, setActiveTab] = useState('principal');
-  const [selectedDashboard, setSelectedDashboard] = useState('analyse-stocks');
+  const [selectedDashboard, setSelectedDashboard] = useState('duree-presence');
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   

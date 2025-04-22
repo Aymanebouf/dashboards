@@ -19,7 +19,8 @@ const Dashboard = () => {
     dashboardTitle,
     kpiData,
     handleDashboardChange,
-    externalDashboardUrl
+    externalDashboardUrl,
+    grafanaConfig
   } = useDashboardController();
 
   // Log the dashboard setup for debugging
@@ -28,9 +29,10 @@ const Dashboard = () => {
       selectedDashboard,
       externalDashboardUrl,
       hasKpiData: !!kpiData,
-      chartsCount: kpiData?.charts?.length || 0
+      chartsCount: kpiData?.charts?.length || 0,
+      hasGrafanaConfig: !!grafanaConfig
     });
-  }, [selectedDashboard, externalDashboardUrl, kpiData]);
+  }, [selectedDashboard, externalDashboardUrl, kpiData, grafanaConfig]);
 
   return (
     <DashboardLayout>
@@ -48,6 +50,7 @@ const Dashboard = () => {
           isAIConfigured={isAIConfigured}
           errorMessage={errorMessage}
           externalDashboardUrl={externalDashboardUrl}
+          grafanaConfig={grafanaConfig}
         />
       </div>
     </DashboardLayout>

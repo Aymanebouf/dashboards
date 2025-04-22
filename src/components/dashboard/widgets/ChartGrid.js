@@ -4,15 +4,16 @@ import { Card } from 'primereact/card';
 import ChartWidget from './ChartWidget';
 import ExternalDashboardEmbed from './ExternalDashboardEmbed';
 
-const ChartGrid = ({ charts, externalDashboardUrl }) => {
+const ChartGrid = ({ charts, externalDashboardUrl, grafanaConfig }) => {
   // Debug log for incoming props
   useEffect(() => {
     console.log('ChartGrid received props:', {
       chartsCount: charts?.length,
       externalDashboardUrl,
+      grafanaConfig: grafanaConfig ? 'present' : 'missing',
       firstChartTitle: charts?.[0]?.title
     });
-  }, [charts, externalDashboardUrl]);
+  }, [charts, externalDashboardUrl, grafanaConfig]);
   
   if (!charts || charts.length === 0) {
     return null;
@@ -44,6 +45,7 @@ const ChartGrid = ({ charts, externalDashboardUrl }) => {
               url={externalDashboardUrl} 
               title={chart.title} 
               height="400px"
+              apiKey={grafanaConfig?.apiKey}
             />
           );
         }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { checkAIConfiguration } from '@/services/aiService';
 import { toast } from 'sonner';
@@ -21,12 +22,18 @@ export const useDashboardController = () => {
     panelId: "1"  // Vous pouvez ajuster cet ID selon le panel que vous souhaitez afficher
   };
 
-  // Construction de l'URL Grafana complète avec l'en-tête d'autorisation
+  // Construction de l'URL Grafana complète
+  // Pour un accès complet au dashboard sans auth dans l'URL (auth par headers)
   const externalDashboardUrl = `${grafanaConfig.baseUrl}/d/${grafanaConfig.dashboardId}?orgId=1&from=now-6h&to=now&theme=light`;
 
   // Log the dashboard URL to verify it's correct
   useEffect(() => {
     console.log("Dashboard URL configured:", externalDashboardUrl);
+    console.log("Grafana configuration:", { 
+      baseUrl: grafanaConfig.baseUrl, 
+      dashboardId: grafanaConfig.dashboardId,
+      hasApiKey: !!grafanaConfig.apiKey
+    });
     // Force the dashboard to be "duree-presence" initially
     setSelectedDashboard('duree-presence');
   }, []);

@@ -2,19 +2,22 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from 'primereact/card';
 
-const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
+const ExternalDashboardEmbed = ({ url, title, height = '500px', apiKey }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     console.log("Loading Grafana dashboard with URL:", url);
+    // Debug the URL and API key being used
+    console.log("Grafana API Key:", apiKey ? "Present (hidden for security)" : "Missing");
+    
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2000);
     return () => clearTimeout(timer);
-  }, [url]);
+  }, [url, apiKey]);
 
-  // Construction de l'URL avec l'en-tête Authorization
-  const finalUrl = url;
+  // For debugging - let's log the full URL
+  console.log("Full Grafana URL being used:", url);
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
@@ -39,13 +42,16 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
           }}
         >
           <iframe
-            src={finalUrl}
+            src={url}
             title={title}
             width="100%"
             height={height}
             frameBorder="0"
             allowFullScreen
-            onLoad={() => setIsLoading(false)}
+            onLoad={() => {
+              console.log("Grafana iframe loaded");
+              setIsLoading(false);
+            }}
             style={{
               position: 'absolute',
               top: 0,

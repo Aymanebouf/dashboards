@@ -17,7 +17,8 @@ const DashboardContent = ({
   kpiData,
   isAIConfigured,
   errorMessage,
-  externalDashboardUrl
+  externalDashboardUrl,
+  grafanaConfig
 }) => {
   const { 
     dashboards, 
@@ -32,9 +33,10 @@ const DashboardContent = ({
     console.log("DashboardContent received props:", { 
       externalDashboardUrl, 
       "firstChartTitle": kpiData?.charts?.[0]?.title,
-      "chartsCount": kpiData?.charts?.length || 0
+      "chartsCount": kpiData?.charts?.length || 0,
+      "hasGrafanaConfig": !!grafanaConfig
     });
-  }, [kpiData, externalDashboardUrl]);
+  }, [kpiData, externalDashboardUrl, grafanaConfig]);
 
   useEffect(() => {
     if (activeTab === 2) { // personnalise tab index
@@ -84,6 +86,7 @@ const DashboardContent = ({
             <ChartGrid 
               charts={kpiData.charts} 
               externalDashboardUrl={externalDashboardUrl} 
+              grafanaConfig={grafanaConfig}
             />
           </>
         )}

@@ -7,37 +7,31 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px', apiKey }) => {
   
   useEffect(() => {
     console.log("Loading Grafana dashboard with URL:", url);
-    // Debug the URL and API key being used
-    console.log("Grafana API Key:", apiKey ? "Present (hidden for security)" : "Missing");
+    console.log("Grafana API Key present:", !!apiKey);
     
-    // Allow more time for loading to complete
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 3000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [url, apiKey]);
-
-  // For debugging - log the full URL
-  console.log("Full Grafana URL being used:", url);
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
       <div className="p-card-header">
-        <div className="p-card-title">{title}</div>
+        <div className="p-card-title">{title || "Dashboard Grafana"}</div>
       </div>
-      <div className="p-card-body">
+      <div className="p-card-body relative">
         {isLoading && (
-          <div className="flex items-center justify-center p-4">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
             <i className="pi pi-spin pi-spinner mr-2"></i>
             <span>Chargement du dashboard Grafana...</span>
           </div>
         )}
         
-        {/* Always render iframe, but control visibility with CSS */}
         <div style={{ width: '100%', height: height, overflow: 'hidden' }}>
           <iframe
             src={url}
-            title={title}
+            title={title || "Grafana Dashboard"}
             width="100%"
             height="100%"
             frameBorder="0"
@@ -59,3 +53,4 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px', apiKey }) => {
 };
 
 export default ExternalDashboardEmbed;
+

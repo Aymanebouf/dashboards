@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { checkAIConfiguration } from '@/services/aiService';
 import { toast } from 'sonner';
@@ -14,7 +13,7 @@ export const useDashboardController = () => {
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   
-  // Configuration Grafana with the values provided by the user
+  // Configuration Grafana mise à jour avec les nouvelles valeurs
   const grafanaConfig = {
     baseUrl: "http://89.145.161.108:3000",
     dashboardId: "-t6si11Nz",
@@ -22,9 +21,8 @@ export const useDashboardController = () => {
     panelId: "1"
   };
 
-  // Construction of the complete Grafana URL with proper formatting
-  // Using the /d/ path format which is standard for Grafana dashboards
-  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d/${grafanaConfig.dashboardId}?orgId=1&theme=light`;
+  // URL du dashboard Grafana
+  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d/${grafanaConfig.dashboardId}?orgId=1&theme=light&kiosk`;
 
   // Log the dashboard URL for debugging
   useEffect(() => {

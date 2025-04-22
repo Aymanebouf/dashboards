@@ -4,17 +4,14 @@ import { Card } from 'primereact/card';
 
 const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
   const [isLoading, setIsLoading] = useState(true);
-
+  
   useEffect(() => {
-    // Set a timeout to hide loading state after a reasonable time
+    console.log("Loading Grafana dashboard with URL:", url);
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2000);
-    
     return () => clearTimeout(timer);
   }, [url]);
-
-  console.log("Rendering external dashboard with URL:", url);
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
@@ -25,15 +22,17 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
         {isLoading && (
           <div className="flex items-center justify-center p-4">
             <i className="pi pi-spin pi-spinner mr-2"></i>
-            <span>Chargement du dashboard externe...</span>
+            <span>Chargement du dashboard Grafana...</span>
           </div>
         )}
-        <div className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`} 
+        <div 
+          className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
           style={{
-            width: '100%', 
+            width: '100%',
             height: height,
-            position: 'relative', 
-            overflow: 'hidden'
+            position: 'relative',
+            overflow: 'hidden',
+            backgroundColor: 'white'
           }}
         >
           <iframe
@@ -45,11 +44,12 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
             allowFullScreen
             onLoad={() => setIsLoading(false)}
             style={{
-              position: 'absolute', 
-              top: 0, 
-              left: 0, 
-              width: '100%', 
-              height: '100%'
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              border: 'none'
             }}
           />
         </div>

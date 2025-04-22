@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { checkAIConfiguration } from '@/services/aiService';
 import { toast } from 'sonner';
@@ -14,16 +13,28 @@ export const useDashboardController = () => {
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   
-  // External dashboard URL for Grafana integration
-  const externalDashboardUrl = "https://c27c-41-250-193-127.ngrok-free.app/d-solo/deih76nv3i03ka/test?orgId=1&from=1744257925511&to=1744279525511&timezone=browser&panelId=1&__feature.dashboardSceneSolo";
-  
+  // Configuration Grafana (à remplacer par vos valeurs)
+  const grafanaConfig = {
+    // L'URL de base de votre Grafana
+    baseUrl: "https://your-grafana-instance.com",
+    // L'ID de votre dashboard
+    dashboardId: "your-dashboard-id",
+    // Votre clé API view-only Grafana
+    apiKey: "your-api-key",
+    // L'ID du panel spécifique à afficher (optionnel)
+    panelId: "1"
+  };
+
+  // Construction de l'URL Grafana complète
+  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d-solo/${grafanaConfig.dashboardId}?orgId=1&from=now-6h&to=now&panelId=${grafanaConfig.panelId}&theme=light`;
+
   // Log the dashboard URL to verify it's correct
   useEffect(() => {
-    console.log("Dashboard Controller initialized with URL:", externalDashboardUrl);
+    console.log("Dashboard URL configured:", externalDashboardUrl);
     // Force the dashboard to be "duree-presence" initially
     setSelectedDashboard('duree-presence');
   }, []);
-  
+
   // Get dashboard data from custom hook
   const { dashboardTitle, kpiData } = useDashboardData(selectedDashboard);
 
@@ -77,6 +88,7 @@ export const useDashboardController = () => {
     dashboardTitle,
     kpiData,
     handleDashboardChange,
-    externalDashboardUrl
+    externalDashboardUrl,
+    grafanaConfig
   };
 };

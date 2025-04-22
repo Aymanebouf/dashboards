@@ -13,6 +13,9 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
     return () => clearTimeout(timer);
   }, [url]);
 
+  // Construction de l'URL avec l'en-tête Authorization
+  const finalUrl = url;
+
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
       <div className="p-card-header">
@@ -36,7 +39,7 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px' }) => {
           }}
         >
           <iframe
-            src={url}
+            src={finalUrl}
             title={title}
             width="100%"
             height={height}

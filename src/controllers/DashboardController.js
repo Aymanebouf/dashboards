@@ -13,20 +13,16 @@ export const useDashboardController = () => {
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   
-  // Configuration Grafana (à remplacer par vos valeurs)
+  // Configuration Grafana
   const grafanaConfig = {
-    // L'URL de base de votre Grafana
-    baseUrl: "https://your-grafana-instance.com",
-    // L'ID de votre dashboard
-    dashboardId: "your-dashboard-id",
-    // Votre clé API view-only Grafana
-    apiKey: "your-api-key",
-    // L'ID du panel spécifique à afficher (optionnel)
-    panelId: "1"
+    baseUrl: "http://89.145.161.108:3000",
+    dashboardId: "-t6si11Nz",
+    apiKey: "glsa_t2jRY1cKy9IsB3nSuA2Mu6Tq5Ubp6WOB_12fa5e39",
+    panelId: "1"  // Vous pouvez ajuster cet ID selon le panel que vous souhaitez afficher
   };
 
-  // Construction de l'URL Grafana complète
-  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d-solo/${grafanaConfig.dashboardId}?orgId=1&from=now-6h&to=now&panelId=${grafanaConfig.panelId}&theme=light`;
+  // Construction de l'URL Grafana complète avec l'en-tête d'autorisation
+  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d/${grafanaConfig.dashboardId}?orgId=1&from=now-6h&to=now&theme=light`;
 
   // Log the dashboard URL to verify it's correct
   useEffect(() => {

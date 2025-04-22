@@ -25,7 +25,7 @@ const Dashboard = () => {
 
   // Log the dashboard setup for debugging
   useEffect(() => {
-    console.log("Dashboard page setup with:", {
+    console.log("Dashboard page loaded with:", {
       selectedDashboard,
       externalDashboardUrl,
       hasKpiData: !!kpiData,

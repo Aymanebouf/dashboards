@@ -10,13 +10,14 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px', apiKey }) => {
     // Debug the URL and API key being used
     console.log("Grafana API Key:", apiKey ? "Present (hidden for security)" : "Missing");
     
+    // Allow more time for loading to complete
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 2000);
+    }, 3000);
     return () => clearTimeout(timer);
   }, [url, apiKey]);
 
-  // For debugging - let's log the full URL
+  // For debugging - log the full URL
   console.log("Full Grafana URL being used:", url);
 
   return (
@@ -31,21 +32,14 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px', apiKey }) => {
             <span>Chargement du dashboard Grafana...</span>
           </div>
         )}
-        <div 
-          className={`iframe-container ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-          style={{
-            width: '100%',
-            height: height,
-            position: 'relative',
-            overflow: 'hidden',
-            backgroundColor: 'white'
-          }}
-        >
+        
+        {/* Always render iframe, but control visibility with CSS */}
+        <div style={{ width: '100%', height: height, overflow: 'hidden' }}>
           <iframe
             src={url}
             title={title}
             width="100%"
-            height={height}
+            height="100%"
             frameBorder="0"
             allowFullScreen
             onLoad={() => {
@@ -53,12 +47,9 @@ const ExternalDashboardEmbed = ({ url, title, height = '500px', apiKey }) => {
               setIsLoading(false);
             }}
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
+              border: 'none',
               width: '100%',
-              height: '100%',
-              border: 'none'
+              height: '100%'
             }}
           />
         </div>

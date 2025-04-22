@@ -14,19 +14,19 @@ export const useDashboardController = () => {
   const [isAIConfigured, setIsAIConfigured] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   
-  // Configuration Grafana
+  // Configuration Grafana with the values provided by the user
   const grafanaConfig = {
     baseUrl: "http://89.145.161.108:3000",
     dashboardId: "-t6si11Nz",
     apiKey: "glsa_t2jRY1cKy9IsB3nSuA2Mu6Tq5Ubp6WOB_12fa5e39",
-    panelId: "1"  // Vous pouvez ajuster cet ID selon le panel que vous souhaitez afficher
+    panelId: "1"
   };
 
-  // Construction de l'URL Grafana complète
-  // Pour un accès complet au dashboard sans auth dans l'URL (auth par headers)
-  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d/${grafanaConfig.dashboardId}?orgId=1&from=now-6h&to=now&theme=light`;
+  // Construction of the complete Grafana URL with proper formatting
+  // Using the /d/ path format which is standard for Grafana dashboards
+  const externalDashboardUrl = `${grafanaConfig.baseUrl}/d/${grafanaConfig.dashboardId}?orgId=1&theme=light`;
 
-  // Log the dashboard URL to verify it's correct
+  // Log the dashboard URL for debugging
   useEffect(() => {
     console.log("Dashboard URL configured:", externalDashboardUrl);
     console.log("Grafana configuration:", { 
@@ -41,11 +41,13 @@ export const useDashboardController = () => {
   // Get dashboard data from custom hook
   const { dashboardTitle, kpiData } = useDashboardData(selectedDashboard);
 
+  // Log when the dashboard data is received
   useEffect(() => {
     console.log("Dashboard data updated:", {
       dashboard: selectedDashboard,
       title: dashboardTitle,
       hasCharts: kpiData?.charts?.length > 0,
+      chartCount: kpiData?.charts?.length || 0,
       firstChartTitle: kpiData?.charts?.[0]?.title
     });
   }, [selectedDashboard, dashboardTitle, kpiData]);

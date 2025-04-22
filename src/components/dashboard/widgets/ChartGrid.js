@@ -24,7 +24,7 @@ const ChartGrid = ({ charts, externalDashboardUrl, grafanaConfig }) => {
     chart.title === 'Durée moyenne de présence par type d\'engin'
   );
   
-  const shouldReplaceChart = chartToReplaceIndex !== -1 && externalDashboardUrl;
+  const shouldReplaceChart = externalDashboardUrl && grafanaConfig;
 
   // Log the replacement decision
   console.log('ChartGrid replacement decision:', {
@@ -33,24 +33,34 @@ const ChartGrid = ({ charts, externalDashboardUrl, grafanaConfig }) => {
     externalDashboardUrl
   });
 
+  // Log explicit message about the Grafana embed
+  if (shouldReplaceChart) {
+    console.log('Will render Grafana dashboard with URL:', externalDashboardUrl);
+  } else {
+    console.log('Will NOT render Grafana dashboard. Missing URL or config');
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Always render Grafana dashboard first, ensuring it's displayed */}
+      {shouldReplaceChart && (
+        <ExternalDashboardEmbed 
+          key="external-grafana-dashboard"
+          url={externalDashboardUrl} 
+          title="Grafana Dashboard" 
+          height="500px"
+          apiKey={grafanaConfig?.apiKey}
+        />
+      )}
+      
+      {/* Then render all the regular charts, except the one that was replaced */}
       {charts.map((chart, index) => {
-        // If this chart should be replaced with the external dashboard
+        // Skip the chart that was replaced by Grafana
         if (shouldReplaceChart && index === chartToReplaceIndex) {
-          console.log(`Replacing chart at index ${index} with external dashboard`);
-          return (
-            <ExternalDashboardEmbed 
-              key={`external-dashboard`}
-              url={externalDashboardUrl} 
-              title={chart.title} 
-              height="400px"
-              apiKey={grafanaConfig?.apiKey}
-            />
-          );
+          return null;
         }
         
-        // Otherwise, render the regular chart
+        // Render regular chart
         return (
           <Card 
             key={`chart-${index}`} 
